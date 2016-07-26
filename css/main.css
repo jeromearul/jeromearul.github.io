@@ -1,43 +1,134 @@
+@charset "UTF-8";
+/* CSS Document */
+
+/* Pluto */
+
+html,
 body {
-    margin: 60px auto;
-    width: 70%;
+	height: 100%;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-weight: 400;
+	letter-spacing: 0.075em;
+	color: #eee;
+	text-align: left;
+	text-shadow: 0 0 3px rgba(0, 0, 0, .8);
+	font-size: 16px;
+	line-height: 1.5em;
+	-webkit-font-smoothing: antialiased;
+	font-smoothing: antialiased;
+	padding: 0;
+	background-color: #333;
 }
-nav ul, footer ul {
-    font-family:'Helvetica', 'Arial', 'Sans-Serif';
-    padding: 0px;
-    list-style: none;
-    font-weight: bold;
-}
-nav ul li, footer ul li {
-    display: inline;
-    margin-right: 20px;
-}
-a {
-    text-decoration: none;
-    color: #999;
-}
-a:hover {
-    text-decoration: underline;
+.wrapper {
+	padding: 7%;
+	position: relative;
+	z-index: 1;
 }
 h1 {
-    font-size: 3em;
-    font-family:'Helvetica', 'Arial', 'Sans-Serif';
+	font-weight: 600;
+	font-size: 4em;
+	line-height: 1em;
+	margin: 0 0 0.6em;
+	letter-spacing: 0.025em;
 }
 p {
-    font-size: 1.5em;
-    line-height: 1.4em;
-    color: #333;
+	margin: 0 0 0 0;
+	line-height: 2.2em;
 }
-footer {
-    border-top: 1px solid #d5d5d5;
-    font-size: .8em;
+p.secondary {
+	font-size: 2em;
+	font-weight: 200;
+	line-height: 1.2em;
+	margin: 0 0 1.2em 0;
+	letter-spacing: 0.075em;
+}
+p a:link {
+    border-bottom: 1px solid currentColor; /* Or whatever color you want */
+    text-decoration: none;
+	color: inherit;
+}
+p a:visited {
+	color: inherit;
+	transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+p a:hover {
+	color: #FF8900;
 }
 
-ul.posts { 
-    margin: 20px auto 40px; 
-    font-size: 1.5em;
+/* waterfall effect background */
+
+.background {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	-webkit-animation: flight 60s linear infinite;
+	animation: flight 60s linear infinite;
+}
+.background img {
+	width: 100%;
+	margin: 0;
+	display: block;
+	border: 0;
+}
+@-webkit-keyframes flight {
+	0% {
+		-webkit-transform: translate(0, 0);
+		transform: translate(0, 0);
+	}
+	100% {
+		-webkit-transform: translate(0, -50%);
+		transform: translate(0, -50%);
+	}
+}
+@keyframes flight {
+	0% {
+		-webkit-transform: translate(0, 0);
+		transform: translate(0, 0);
+	}
+	100% {
+		-webkit-transform: translate(0, -50%);
+		transform: translate(0, -50%);
+	}
 }
 
-ul.posts li {
-    list-style: none;
+
+/*
+ * Adjustments for small and large screens
+ */
+
+@media (max-width: 400px) {
+	body {
+		font-size: 12px;
+	}
+	.wrapper {
+		padding: 7%;
+	}
+	p {
+		margin-bottom: 2em;
+		line-height: 1.8em;
+		font-size: 1.2em;
+	}
+}
+@media (min-width: 400px and max-width: 640px) {
+	body {
+		font-size: 14px;
+	}
+	p {
+		margin-bottom: 2em;
+		line-height: 1.8em;
+	}
+	.background {
+		-webkit-animation-duration: 30s;
+		animation-duration: 30s;
+	}
+}
+@media (min-width: 1280px) {
+	body {
+		font-size: 20px;
+	}
+	.background {
+		-webkit-animation-duration: 80s;
+		animation-duration: 80s;
+	}
 }

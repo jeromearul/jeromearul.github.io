@@ -52,7 +52,7 @@ p a:visited {
 	transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 p a:hover {
-	color: #FF8900;
+	color: #FF01FD;
 }
 
 /* waterfall effect background */

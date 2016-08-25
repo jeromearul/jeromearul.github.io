@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>This is a Heading</h1>
+
+<img id="img1" src="bulbon.gif" style="position:absolute;left:0px;top:0px;z-index:-1;width:100px;height:180px;">
+
+<button type="button" onclick="myFunction()">Alert stack order</button>
+
+<p>Default z-index is 0. Z-index -1 has lower priority.</p>
+
+<script>
+function myFunction() {
+    alert(document.getElementById("img1").style.zIndex);
+}
+</script>
+
+</body>
+</html>

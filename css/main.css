@@ -8,7 +8,6 @@ body {
 	height: 100%;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-weight: 400;
-	letter-spacing: 0.075em;
 	color: #eee;
 	text-align: left;
 	text-shadow: 0 0 3px rgba(0, 0, 0, .8);
@@ -29,11 +28,12 @@ h1 {
 	font-size: 4em;
 	line-height: 1em;
 	margin: 0 0 0.6em;
-	letter-spacing: 0.050em;
+	letter-spacing: 0.010em;
 }
 p {
 	margin: 0 0 0 0;
 	line-height: 2.2em;
+	letter-spacing: 0.075em;
 }
 p.secondary {
 	font-size: 2em;

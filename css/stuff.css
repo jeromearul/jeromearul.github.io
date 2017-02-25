@@ -23,9 +23,6 @@ body {
 	position: relative;
 	z-index: 1;
 }
-.nav link {
-	text-decoration: none;
-}
 h1 {
 	font-weight: 600;
 	font-size: 4em;

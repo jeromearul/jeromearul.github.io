@@ -23,7 +23,7 @@ body {
 	position: relative;
 	z-index: 1;
 }
-.nav {
+.nav link {
 	text-decoration: none;
 }
 h1 {

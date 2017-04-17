@@ -7,6 +7,11 @@
   width: 50%;
 }
 
+.containerin {
+  position: relative;
+  width: 100%;
+}
+
 .image {
   display: block;
   width: 100%;
@@ -22,8 +27,8 @@
   height: 100%;
   width: 100%;
   opacity: 0;
-  transition: .5s ease;
-  background-color: #008CBA;
+  transition: .2s ease;
+  background-color: #000000;
 }
 
 .container:hover .overlay {
@@ -39,6 +44,7 @@
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
 }
+
 </style>
 </head>
 <body>
@@ -46,8 +52,7 @@
 <div class="container">
   <img src="underconstruction/jerome2black.jpg" class="image">
   <div class="overlay">
-    <div class="container">
-    
+    <div class="containerin">
     <img src="underconstruction/jerome2white.jpg" class="image"></div>
   </div>
 </div>

@@ -24,7 +24,7 @@ X X X X X X X X X X -->
 
 <!--HEADER SECTION -->
 <img src="autoauto/autoauto.png" alt="autoauto" width="100%" href="http://jeromearul.com/autoauto">
-<div id="desc"><a>DIGITAL FABRICATION</a></div>
+<div id="desc"><p class="stretch one">DIGITAL FABRICATION</p></div>
 
 <div id="header"><pre>
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</pre></div>
@@ -106,6 +106,38 @@ X X X X X X X X X X -->
 <span class="footdogs">  &#215; </span>
 <a target="_blank" href="https://github.com/N-O-D-E/N-O-D-E.net">BLOG</a>
 </div>
+
+<!--JS -->
+<script>
+<!-- FOR HEADER LETTER SPACING -->
+$.fn.stretch_text = function(){
+    var elmt          = $(this),
+        cont_width    = elmt.width(),
+        txt           = elmt.html(),
+        one_line      = $('<span class="stretch_it">' + txt + '</span>'),
+        nb_char       = elmt.text().length,
+        spacing       = cont_width/nb_char,
+        txt_width;
+    
+    elmt.html(one_line);
+    txt_width = one_line.width();
+    
+    if (txt_width < cont_width){
+        var  char_width     = txt_width/nb_char,
+             ltr_spacing    = spacing - char_width + (spacing - char_width)/nb_char ; 
+  
+        one_line.css({'letter-spacing': ltr_spacing});
+    } 
+};
+
+
+$(document).ready(function () {
+    $('.stretch').each(function(){
+        $(this).stretch_text();
+    });
+});
+<!-- FOR HEADER LETTER SPACING, END -->
+</script>
 
 </body>
 </html>

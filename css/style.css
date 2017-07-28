@@ -24,12 +24,16 @@ a               {text-decoration: none; color: #444; transition-duration: 0.2s;}
 a:hover         {color: #000; font-weight:500; text-decoration: underline;}
 p               {padding: 0; margin: 10px 0 30px 0;}
 img             {max-width: 100%; margin-bottom: 20px;}
+
+/*CLASS*/
 #desc           {margin-bottom: 50px; margin-top: 50px; font-size: 50px; width:100%;}
 #page           {max-width: 100%; min-height: 100%; margin: auto; padding: 35px 60px;}
 #content        {width: 100%;}
 #header,#footer {width: 100%; overflow: hidden; letter-spacing: 0px;}
 #list           {margin-bottom: 50px; margin-top: -30px;}
 #post           {max-width: 720px; margin-bottom: 20px; margin-top: -10px; line-height: 28px;}
+
+/*ID*/
 .categories		{max-width: 300px; right:0; margin: 40px 60px 0 0; position: fixed; background: #222;
 				text-align: right; z-index: 0;}
 @media 			all and (max-width: 1000px) and (min-width: 20px) {
@@ -38,8 +42,11 @@ img             {max-width: 100%; margin-bottom: 20px;}
 }
 .catbox			{width: 300px; height: 160px; right:0; margin:0; position: absolute; background: #222;
 				display: block; z-index: 999;}
-.one			{font-size:50px;}
+.one			{font-size:50px; width:300px; padding: 10px 0;}
 .stretch_it		{white-space: nowrap;}
+.justify{
+    text-align:justify;
+}
 .footdogs       {margin:0 5px}
 .tag            {color: #444;}
 .important      {margin-left: -18px;}

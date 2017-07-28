@@ -110,7 +110,7 @@ X X X X X X X X X X -->
 <!--JS -->
 <script>
 <!-- FOR HEADER LETTER SPACING -->
-$.fn.stretch_text = function(){
+$.fn.strech_text = function(){
     var elmt          = $(this),
         cont_width    = elmt.width(),
         txt           = elmt.html(),
@@ -127,13 +127,16 @@ $.fn.stretch_text = function(){
              ltr_spacing    = spacing - char_width + (spacing - char_width)/nb_char ; 
   
         one_line.css({'letter-spacing': ltr_spacing});
-    } 
+    } else {
+        one_line.contents().unwrap();
+        elmt.addClass('justify');
+    }
 };
 
 
 $(document).ready(function () {
     $('.stretch').each(function(){
-        $(this).stretch_text();
+        $(this).strech_text();
     });
 });
 <!-- FOR HEADER LETTER SPACING, END -->

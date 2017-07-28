@@ -42,7 +42,7 @@ img             {max-width: 100%; margin-bottom: 20px;}
 }
 .catbox			{width: 300px; height: 160px; right:0; margin:0; position: absolute; background: #222;
 				display: block; z-index: 999;}
-.one			{font-size:50px; width:300px; padding: 10px 0;}
+.one			{font-size:50px; width:900px; padding: 10px 0;}
 .stretch_it		{white-space: nowrap;}
 .justify{
     text-align:justify;

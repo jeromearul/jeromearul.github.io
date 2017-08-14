@@ -24,17 +24,9 @@ img             {max-width: 100%; margin-bottom: 20px;}
 #list           {margin-bottom: 20px; margin-top: 20px;}
 #post           {max-width: 720px; margin-bottom: 20px; margin-top: -10px; line-height: 28px;}
 
-.X       {margin:0 5px}
-.tag            {color: #444;}
-.important      {margin-left: -18px;}
+.X       		{margin:0 5px}
 .title          {display: inline-block; margin-bottom: 20px; margin-top: 20px;}
-.shoptitle      {display: inline-block; margin-bottom: 20px; margin-top: 20px; position: fixed;}
-.subtitle       {display: inline-block; margin: 20px 0;}
-.code           {max-width: 720px; background: #1f1f1f; padding: 20px; margin:10px 0 30px 0; display:inline-block;}
-.shop           {max-width: 720px; margin: -10px 0 40px 0;}
-.codesmall      {background: #fff; display:inline-block;}
 .filter         {display:block; margin-bottom: 20px; margin-top: 20px;}
-.node:hover     {text-decoration: none;}
 .description    {background: #fff; padding: 10px 0 10px 10px; margin-top: 0px;}
 .videowrapper   {position: relative; padding-bottom: 56.45%; height: 0;}
 .videowrapper iframe {position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0);}

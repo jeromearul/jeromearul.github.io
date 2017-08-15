@@ -8,7 +8,7 @@ beep beep boop
 body            {letter-spacing: 0.1px; padding: 0; margin: 0; font-family: Courier, Monospace; 
                 font-weight: 400; font-size: 17px; color: #444; min-height: 100%; background: #fff;}
 html            {-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
-pre             {padding: 0; margin: 0 0 20px 0;}
+pre             {padding: 0; margin: 0;}
 ul              {padding: 0;}
 span            {padding: 0; margin: 0 10px 0 0;}
 li              {margin: 15px 0; padding: 0; list-style: none;}

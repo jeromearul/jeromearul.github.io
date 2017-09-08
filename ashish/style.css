@@ -3,7 +3,7 @@
 
 body {
   font-family: Futura, sans-serif;
-  max-width: 500px;
+  max-width: 960px;
   margin: auto;
 }
 
@@ -13,13 +13,13 @@ body {
 
 /* Navigation Bar */
 /* Add a black background color to the top navigation */
-.topnav            {background-color: white; overflow: hidden;}
+.nav            {background-color: white; overflow: hidden;}
 /* Style the links inside the navigation bar */
-.topnav a          {float: left; display: block; color: black; text-align: center; padding: 10px 20px 20px 20px; text-decoration: none; font-size: 17px;}
+.nav a          {float: left; display: block; color: black; text-align: center; padding: 10px 20px 20px 20px; text-decoration: none; font-size: 17px;}
 /* Change the color of links on hover */
-.topnav a:hover    {background-color: white; color: #BF19CF;}
+.nav a:hover    {background-color: white; color: #BF19CF;}
 /* Add a color to the active/current link */
-.topnav a.active   {background-color: #4CAF50; color: white;}
+.nav a.active   {background-color: #4CAF50; color: white;}
 
 .row > .column {
   padding: 20px 20px;
@@ -33,7 +33,7 @@ body {
 
 .column {
   float: left;
-  width: 25%;
+  width: 33%;
 }
 
 /* The Modal (background) */

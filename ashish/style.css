@@ -1,42 +1,21 @@
 @charset "UTF-8";
 /* Ashish's CSS */
 
-body {
-  font-family: Futura, sans-serif;
-  max-width: 960px;
-  margin: auto;
-}
-
-* {
-  box-sizing: border-box;
-}
+body            {font-family: Futura, sans-serif; max-width: 960px; margin: auto;}
+*               {box-sizing: border-box;}
 
 /* Navigation Bar */
-/* Add a black background color to the top navigation */
-.nav            {background-color: white; overflow: hidden;}
-/* Style the links inside the navigation bar */
-.nav a          {float: left; display: block; color: black; text-align: center; padding: 10px 20px 20px 20px; text-decoration: none; font-size: 17px;}
-/* Change the color of links on hover */
-.nav a:hover    {background-color: white; color: #BF19CF;}
-/* Add a color to the active/current link */
-.nav a.active   {background-color: #4CAF50; color: white;}
+.nav            {background-color: white; overflow: hidden;} /* Add a black background color to the top navigation */
+.nav a          {float: left; display: block; color: black; text-align: center; padding: 10px 20px 20px 20px; text-decoration: none; font-size: 17px;} /* Style the links inside the navigation bar */
+.nav a:hover    {background-color: white; color: #BF19CF;} /* Change the color of links on hover */
+.nav a.active   {background-color: #4CAF50; color: white;} /* Add a color to the active/current link */
 
-.row > .column {
-  padding: 20px 20px;
-}
+/* Thumbnails */
+.row > .column  {padding: 20px 20px;}
+.row:after      {content: ""; display: table; clear: both;}
+.column {float: left; width: 33%;}
 
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
-}
-
-.column {
-  float: left;
-  width: 33%;
-}
-
-/* The Modal (background) */
+/* Modal (background) */
 .modal {
   display: none;
   position: fixed;
@@ -53,10 +32,10 @@ body {
 /* Modal Content */
 .modal-content {
   position: relative;
-  background-color: black;
+  background-color: white;
   margin: auto;
   padding: 0;
-  width: 90%;
+  width: 75%;
   max-width: 1200px;
 }
 

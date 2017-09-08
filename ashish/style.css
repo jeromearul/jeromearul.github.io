@@ -3,7 +3,8 @@
 
 body {
   font-family: Futura, sans-serif;
-  margin: 30px;
+  max-width: 500px;
+  margin: auto;
 }
 
 * {
@@ -21,7 +22,7 @@ body {
 .topnav a.active   {background-color: #4CAF50; color: white;}
 
 .row > .column {
-  padding: 0 20px;
+  padding: 20px 20px;
 }
 
 .row:after {

@@ -13,7 +13,7 @@ body            {font-family: Futura, sans-serif; max-width: 960px; margin: auto
 /* Thumbnails */
 .row > .column  {padding: 20px 20px;}
 .row:after      {content: ""; display: table; clear: both;}
-.column         {float: left; width: 33%;}
+.column         {position: relative; float: left; width: 33%;}
 .modalcolumn    {float: left; width: 16%;}
 
 /* Modal (background) */

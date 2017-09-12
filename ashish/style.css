@@ -119,16 +119,15 @@ img {
 /* Hover stuff */
 .overlay {
   position: absolute;
-  padding: 20px 20px;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  top: 20;
+  bottom: 20;
+  left: 20;
+  right: 20;
   height: 100%;
   width: 100%;
-  opacity: 0;
-  transition: .5s ease;
-  background-color: #008CBA;
+  opacity: 0.5;
+  transition: .3s ease;
+  background-color: #666;
 }
 
 .text {

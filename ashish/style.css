@@ -119,6 +119,7 @@ img {
 /* Hover stuff */
 .overlay {
   position: absolute;
+  padding: 20px 20px;
   top: 0;
   bottom: 0;
   left: 0;

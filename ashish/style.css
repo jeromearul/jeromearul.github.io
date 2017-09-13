@@ -5,7 +5,7 @@ body            {font-family: Futura, sans-serif; max-width: 960px; margin: auto
 *               {box-sizing: border-box;}
 
 /* Navigation Bar */
-.nav            {background-color: white; overflow: hidden;} /* Add a black background color to the top navigation */
+.nav            {background-color: white; overflow: hidden;} /* Add a white background color to the top navigation */
 .nav a          {float: left; display: block; color: black; text-align: center; padding: 10px 20px 20px 20px; text-decoration: none; font-size: 17px;} /* Style the links inside the navigation bar */
 .nav a:hover    {background-color: white; color: #BF19CF;} /* Change the color of links on hover */
 .nav a.active   {background-color: #4CAF50; color: white;} /* Add a color to the active/current link */
@@ -119,10 +119,10 @@ img {
 /* Hover stuff */
 .overlay {
   position: absolute;
-  top: 20px;
-  bottom: -20px;
-  left: 20px;
-  right: -20px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   opacity: 0;
   transition: .3s ease;
   background-color: #666;

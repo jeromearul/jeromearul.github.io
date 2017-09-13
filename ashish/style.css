@@ -119,7 +119,7 @@ img {
 /* Hover stuff */
 .overlay {
   position: absolute;
-  margin: 20px -20px -20px 20px;
+  margin: 20px -60px -60px 20px;
   top: 0;
   bottom: 0;
   left: 0;
@@ -142,7 +142,7 @@ img {
 }
 
 .column:hover .overlay {
-  opacity: 1;
+  opacity: .5;
 }
 
 .demo {

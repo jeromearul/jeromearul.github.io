@@ -1,6 +1,6 @@
 <html><head><title>make me a maze!</title>
 <style type="text/css">
-a { font-family: helvetica; }
+a, label { font-family: helvetica; }
 table { border-collapse: collapse }
 td { width: 1em; height: 1em; border: 1px solid }
 td.s { border-bottom: none }
@@ -110,7 +110,7 @@ function solve(c, t) {
 </script></head>
 <body><form><fieldset>
 <label>rows </label><input id='rows' size="3"/>
-<label>colums </label><input id='cols' size="3"/>
-<a href="javascript:make_maze()">Generate</a>
-<a id='solve' style='display:none' href='javascript:solve(); void(0)'>Solve</a>
+<label>columns </label><input id='cols' size="3"/>
+<a href="javascript:make_maze()">make</a>
+<a id='solve' style='display:none' href='javascript:solve(); void(0)'>solve</a>
 </fieldset></form><table id='maze'/></body></html>

@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset=utf-8>
+<title>Table Maker</title>
+<style>
+
+body{
+	overflow:hidden;
+	margin: 0;
+	font-family:arial; 
+}
+
+#notes{
+	font-size:12px;  
+}
+
+input{
+	width:50px;
+}
+
+a{
+	color:#0000ff;
+	text-decoration:none;
+}
+
+a:hover{
+	color:#0000aa;
+	text-decoration:underline;
+}
+
+
+#parameters{
+	position:absolute;
+}
+
+input[type="checkbox"] {
+	transform:scale(1, 1);
+}
+
+.button{
+	width:83px;
+	height:40px;
+}
+
+#myCanvas{
+	position:absolute;
+	top:2px;
+	left:2px;
+	/*border-radius:10px;*/
+	border: solid 2px #777;
+}
+
+#makeDiv{
+	position:absolute;
+	bottom:100px;
+	right:10px;
+}
+
+#make{
+	position:absolute;
+	bottom:0px;
+	right:10px;
+}
+
+#explode{
+	height:40px;
+}
+
+
+#pp{
+	position:absolute;
+	right:110px;
+	bottom:15px;
+}
+
+#db{
+  width: 100px;
+  height: auto;
+}
+
+#gh{
+	position:absolute;
+	right: 10px;
+	top:5px;
+}
+
+
+</style>
+
+
+</head>
+
+<body onResize="draw()">
+
+<!--
+	onResize="window.location=window.location;"
+-->
+
+<script src="js/libs/jquery-3.1.1.min.js"></script>
+<script src="js/libs/jquery.mousewheel.min.js"></script>
+<script src="js/libs/three.js"></script>
+
+<script src="js/table.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/make.js"></script>
+
+<canvas id="myCanvas"></canvas>
+
+<div id="parameters" style="top:10px;left:10px">
+
+TABLE<br>
+
+&emsp;<select id="size" autocomplete="off">
+	<option value="36">36 x 36 x 37.125</option>
+	<option value="60">60 x 36 x 37.125</option>
+	<option selected value="30">36 x 30 x 36</option>
+	<option value="30x60">60 x 30 x 36</option>
+	<option disabled value="custom">custom</option>
+</select><p>
+
+&emsp;table height<br>
+&emsp;&emsp;<input id='table-height' type="number" value="34.5" step="0.125" autocomplete="off"/><br>
+
+&emsp;table width<br>
+&emsp;&emsp;<input id='table-width' type="number" value="36" step="0.125" autocomplete="off"/><br>
+
+&emsp;table depth<br>
+&emsp;&emsp;<input id='table-depth' type="number" value="36" step="0.125" autocomplete="off"/><br>
+
+&emsp;leg width<br>
+&emsp;&emsp;<input id='leg-width' type="number" value="5" step="0.125" autocomplete="off"/><br>
+
+&emsp;material thickness<br>
+&emsp;&emsp;<input id='thickness' type="number" value="0.705" step="0.001" autocomplete="off"/><br>
+
+&emsp;top radius<br>
+&emsp;&emsp;<input id='radius' type="number" value="1" step="0.0625" autocomplete="off"/><br>
+
+&emsp;top edge overhang<br>
+&emsp;&emsp;<input id='overhang' type="number" value="2" min="0" step="0.0625" autocomplete="off"/><p>
+
+&emsp;shelf<input id='shelf' type="checkbox" onclick="updateAll()" autocomplete="off" checked="true"/><p>
+
+<p>
+&emsp;BOM<br>
+&emsp;&emsp;<a title="16 per table, 8 per shelf" href="https://www.mcmaster.com/#90910A543">screws</a><br>
+&emsp;&emsp;<a title="16 per table, 8 per shelf" href="https://www.mcmaster.com/#91090A108">washers 1/4"</a><br>
+&emsp;&emsp;<a title="16 per table, 8 per shelf" href="https://www.mcmaster.com/#90975A029">threaded inserts</a><br>
+&emsp;&emsp;<a title="for material thickness < 0.5&#34;" href="https://www.mcmaster.com/#90975A027">threaded inserts</a><br>
+&emsp;&emsp;<a title="4 per table" href="https://www.mcmaster.com/#24025T66">casters</a><br>
+&emsp;&emsp;<a title="4 per table (for casters)" href="https://www.mcmaster.com/#95462A031">nuts 3/8"</a><br>
+&emsp;&emsp;<a title="4 per table (for casters)" href="https://www.mcmaster.com/#92141A031">washers 3/8"</a><br>
+
+<div id="notes">
+&emsp;notes:<br>
+&emsp;&emsp;height does not include caster height (2-3/4")<br>
+&emsp;&emsp;dxf does not yet include dogbone fillets<br>
+&emsp;&emsp;tool: 1/4" 2-flute upcut, 1/4" cut depth, 1.5"/sec<br>
+&emsp;&emsp;pocket interior shapes of table top<br>
+
+</div>
+
+</div>
+
+<div id='makeDiv'>
+
+2D<input id='2D' type="checkbox" onclick="updateAll()" autocomplete="off" checked="true"/><p>
+
+
+<select id="output" autocomplete="on">
+	<option value="dxf" selected>DXF</option>
+	<option value="gcode"disabled>G-code</option>
+	<option value="sbp_sb"disabled>SBP</option>
+</select><p>
+
+</div>
+
+<div id='make'>
+	<a href="#" id="downloadLink"></a>
+	<input class="button" type="submit" value="make" style="height:80px;" onclick="make()"/><p>
+</div>
+
+
+<div id="pp">
+	<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+	<input type="hidden" name="cmd" value="_s-xclick">
+	<input type="hidden" name="hosted_button_id" value="8ED69W882F9PC">
+	<input id="db" type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+	<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+	</form>
+</div>
+
+<div id="gh">
+
+	<a href="https://www.github.com/incite-focus/table">GitHub</a>
+
+</div>
+
+<script>
+
+//TODO
+//
+//
+
+//
+//dogbones
+//fillets
+//gcode & sbp
+
+table=table30
+
+$("#table-height").val(table.height)
+$("#table-width").val(table.width)
+$("#table-depth").val(table.depth)
+$("#leg-width").val(table.legWidth)
+$("#radius").val(table.topRadius)
+$("#overhang").val(table.overHang)
+$("#thickness").val(table.thickness)
+
+
+document.getElementById('2D').checked=false
+document.getElementById('shelf').checked=false
+
+
+var scene = new THREE.Scene() 
+ 
+var renderer = new THREE.WebGLRenderer() 
+renderer.setSize( window.innerWidth, window.innerHeight ) 
+document.body.appendChild( renderer.domElement )
+
+var camera = new THREE.OrthographicCamera( window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, -1000, 5000 )
+
+camera.position.y = 500
+camera.position.z =300
+camera.rotation.x = -Math.PI/4
+
+renderer.setClearColor(0xffffff, 1)
+
+var extrudeSettings = {
+steps: 1,
+amount: 50,
+bevelEnabled: false,
+material: 0,
+extrudeMaterial: 1
+};
+
+var material1 =new THREE.MeshBasicMaterial( {
+transparent: false,
+opacity: 0.5,
+color: 0xffffff, 
+polygonOffset: true, 
+polygonOffsetFactor: 1 
+})
+
+var material2 =new THREE.MeshBasicMaterial( {
+transparent: false,
+opacity: 0.5,
+color: 0xffffff, 
+polygonOffset: true, 
+polygonOffsetFactor: 1 
+})
+
+//side
+var material3 =new THREE.MeshBasicMaterial( {
+transparent: true,
+opacity: 0.4,
+color: 0xcc9966, 
+polygonOffset: true, 
+polygonOffsetFactor: 1 
+})
+
+//face
+var material4 =new THREE.MeshBasicMaterial( {
+transparent: true,
+opacity: 0.5,
+color: 0xe9ccb0, 
+polygonOffset: true, 
+polygonOffsetFactor: 1 
+})
+
+var materials = new THREE.MeshFaceMaterial([material4, material3]);
+
+var material5 =new THREE.MeshBasicMaterial( {
+transparent: true,
+opacity: 0.7,
+color: 0xe9ccb0, 
+polygonOffset: true, 
+polygonOffsetFactor: 1 
+})
+
+var material6 =new THREE.MeshBasicMaterial( {
+transparent: true,
+opacity: 0.7,
+color: 0xe9ccb0, 
+polygonOffset: true, 
+polygonOffsetFactor: 1 
+})
+
+
+var lineMaterial = new THREE.LineBasicMaterial( { 
+color: 0x000000, 
+linewidth: 1 
+} )
+
+var lineMaterial2 = new THREE.LineBasicMaterial( { 
+color: 0xdddddd, 
+linewidth: 1 
+} )
+
+
+var lineMaterial3 = new THREE.LineBasicMaterial( {
+transparent: true,
+opacity: 0.3, 
+color: 0xff0000, 
+linewidth: 1 
+} )
+
+var lineMaterial4 = new THREE.LineBasicMaterial( {
+transparent: true,
+opacity: 0.5, 
+color: 0x00ff00, 
+linewidth: 1 
+} )
+
+
+var lineMaterial5 = new THREE.LineBasicMaterial( {
+transparent: true,
+opacity: 0.4, 
+color: 0xff00ff, 
+linewidth: 1 
+} )
+
+var planeMaterial = new THREE.MeshBasicMaterial( {
+transparent: true,
+opacity: 0.3,
+color: 0xeeeeff, 
+side: THREE.DoubleSide,
+polygonOffset: true, 
+polygonOffsetFactor: 1
+})
+
+
+var r = 0
+var sf = 1
+var dir = true
+
+var chamfer = 0.5
+var chamfer2 = 0
+var polygons = []
+var offset = []
+
+//
+
+var height 
+var tool = 0.25 //dia
+
+var thickness=parseFloat(document.getElementById('thickness').value)
+
+var sf2=14
+
+var custom = false
+
+//parts
+
+var tableTop={cutout:[],holes:[],pockets:[]}
+var tableSupportFront={cutout:[],holes:[],pockets:[]}
+var tableSupportSide={cutout:[],holes:[],pockets:[]}
+var tableLeg1={cutout:[],holes:[],pockets:[]}
+var tableLeg2={cutout:[],holes:[],pockets:[]}
+var tableFoot1={cutout:[],holes:[],pockets:[]}
+var tableFoot2={cutout:[],holes:[],pockets:[]}
+var tableShelf={cutout:[],holes:[],pockets:[]}
+var tableShelfBlock={cutout:[],holes:[],pockets:[]}
+
+var explodeView = false
+
+function explode(){
+	explodeView=!explodeView
+}
+
+var d = 0
+
+function render() { 
+
+	requestAnimationFrame(render)
+
+	r-=0.003
+	if(Math.abs(r)>=2*Math.PI){
+		r=0
+	}
+	
+	for(i=0;i<scene.children.length;i++){
+		scene.children[i].rotation.y=r
+
+	}
+
+	renderer.render(scene, camera)
+ 
+} 
+
+
+
+function rotateX(o,a){
+	o.geometry.applyMatrix(new THREE.Matrix4().makeRotationX(a))
+}
+function rotateY(o,a){
+	o.geometry.applyMatrix(new THREE.Matrix4().makeRotationY(a))
+}
+function rotateZ(o,a){
+	o.geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(a))
+}
+
+function translate(o,x,y,z){
+	o.geometry.applyMatrix( new THREE.Matrix4().makeTranslation( x,y,z) )
+}
+
+
+function updateAll(){
+
+	while (scene.children.length > 0) {
+		scene.remove(scene.children[scene.children.length - 1])
+	}
+
+	//plane
+	geometry = new THREE.PlaneGeometry( 480, 480, 32 )
+	plane = new THREE.Mesh( geometry, planeMaterial )
+	
+	scene.add( plane )
+	plane.geometry.applyMatrix( new THREE.Matrix4().makeRotationX(Math.PI/2 ) )
+	//translate(plane,0,-3,0)
+	//outline
+	pts = new THREE.Geometry()
+
+	//grid 48 x 48 x 1"
+	l=48/2*10
+	w=48/2*10
+
+	for(i=0;i<48;i++){
+		if(i%2==0){
+			pts.vertices.push(new THREE.Vector3(-w, -l, 0))
+			pts.vertices.push(new THREE.Vector3(-w, l, 0))
+		}
+		else{
+			pts.vertices.push(new THREE.Vector3(-w, l, 0))
+			pts.vertices.push(new THREE.Vector3(-w, -l, 0))
+		
+		}
+		w-=10
+	}
+
+	for(i=0;i<48;i++){
+		if(i%2==0){
+			pts.vertices.push(new THREE.Vector3(-w, -l, 0))
+			pts.vertices.push(new THREE.Vector3(w, -l, 0))
+		}
+		else{
+			pts.vertices.push(new THREE.Vector3(w, -l, 0))
+			pts.vertices.push(new THREE.Vector3(-w, -l, 0))
+		
+		}
+		l-=10
+	}
+
+		pts.vertices.push(new THREE.Vector3(-w, -l, 0))
+		pts.vertices.push(new THREE.Vector3(w, -l, 0))
+
+
+		pts.vertices.push(new THREE.Vector3(-w, -l, 0))
+		pts.vertices.push(new THREE.Vector3(-w, l, 0))
+	
+
+	outline = new THREE.Line(pts, lineMaterial2)
+	outline.geometry.applyMatrix( new THREE.Matrix4().makeRotationX(Math.PI/2 ) )
+	translate(outline,0,-0.5,0)
+	scene.add(outline)
+
+
+	pts2 = new THREE.Geometry()
+	pts2.vertices.push(new THREE.Vector3(240,0,0))
+	pts2.vertices.push(new THREE.Vector3(-240,0,0))
+	xAxis = new THREE.Line(pts2, lineMaterial3)
+	scene.add(xAxis)
+
+
+	pts3 = new THREE.Geometry()
+	pts3.vertices.push(new THREE.Vector3(0,0,240))
+	pts3.vertices.push(new THREE.Vector3(0,0,-240))
+	yAxis = new THREE.Line(pts3, lineMaterial4)
+	scene.add(yAxis)
+
+
+	pts4 = new THREE.Geometry()
+	pts4.vertices.push(new THREE.Vector3(0,0,0))
+	pts4.vertices.push(new THREE.Vector3(0,480,0))
+	zAxis = new THREE.Line(pts4, lineMaterial5)
+	scene.add(zAxis)
+
+	//scale(sf)
+	loadParts()
+
+}
+
+render()
+
+
+function scale(s){
+
+	for(i=0;i<scene.children.length;i++){
+
+		if(scene.children[i].type!="Sprite"){
+
+			scene.children[i].scale.set(s,s,s)
+
+		}
+
+	}
+
+}
+
+
+
+updateAll()
+
+
+
+
+$("body").on('mousewheel',function(e){
+	
+	sf+=(e.deltaY/10)
+
+	if(sf<0.1){
+		sf=0.1
+	}
+	scale(sf)
+
+	sf2+=(e.deltaY/2)
+
+	if(sf2<0.1){
+		sf2=0.1
+	}
+
+	draw()
+})
+
+function loadParts(){
+
+	if(custom==true){
+		$("#size").val("custom")
+	}
+
+	
+	clearance = 0.002	//top supports
+	clearance2 = 0.001 //holes
+	clerance3 = 0 //legs
+	pocketClearance = 0.025 //0.01
+
+	fillet=0.05
+
+	tableTop={cutout:[],holes:[],pockets:[]}
+	tableSupportFront={cutout:[],holes:[],pockets:[]}
+	tableSupportSide={cutout:[],holes:[],pockets:[]}
+	tableLeg1={cutout:[],holes:[],pockets:[]}
+	tableLeg2={cutout:[],holes:[],pockets:[]}
+	tableFoot1={cutout:[],holes:[],pockets:[]}
+	tableFoot2={cutout:[],holes:[],pockets:[]}
+
+	tableShelf={cutout:[],holes:[],pockets:[]}
+	tableShelfBlock={cutout:[],holes:[],pockets:[]}
+
+	n=100
+		
+	for(i=n;i>=0;i--){
+		if(i==n){
+			cX=-table.width/2+table.topRadius
+			cY=table.depth/2-table.topRadius
+		}
+		else if(i==(n*0.75-1)){
+			tableTop.cutout.push({X:tableTop.cutout[tableTop.cutout.length-1].X,Y:tableTop.cutout[tableTop.cutout.length-1].Y-table.depth+table.topRadius*2})
+			cY=-table.depth/2+table.topRadius				
+		}
+		else if(i==(n*0.5-1)){
+			tableTop.cutout.push({X:tableTop.cutout[tableTop.cutout.length-1].X+table.width-table.topRadius*2,Y:tableTop.cutout[tableTop.cutout.length-1].Y})
+			cX=table.width/2-table.topRadius				
+		}
+		else if(i==(n*0.25-1)){
+			tableTop.cutout.push({X:tableTop.cutout[tableTop.cutout.length-1].X,Y:tableTop.cutout[tableTop.cutout.length-1].Y+table.depth-table.topRadius*2})
+			cY=table.depth/2-table.topRadius				
+		}
+		tableTop.cutout.push({X:(cX)+Math.sin((Math.PI*2)/n*i)*table.topRadius,Y:(cY)+Math.cos((Math.PI*2)/n*i)*table.topRadius})
+	}
+	
+		tableTop.pockets.push([])
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang+thickness+pocketClearance,Y:-table.depth/2+table.overHang+thickness+((table.depth-(table.overHang*2)-thickness*2)/5)})		
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang,Y:-table.depth/2+table.overHang+thickness+((table.depth-(table.overHang*2)-thickness*2)/5)})
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang,Y:-table.depth/2+table.overHang})
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang+((table.width-table.overHang*2)/5),Y:-table.depth/2+table.overHang})
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang+((table.width-table.overHang*2)/5),Y:-table.depth/2+table.overHang+thickness+pocketClearance})
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang+thickness+pocketClearance,Y:-table.depth/2+table.overHang+thickness+pocketClearance})
+
+		//mirror
+		tableTop.pockets.push([])
+		for(i=0;i<tableTop.pockets[0].length;i++){
+			tableTop.pockets[tableTop.pockets.length-1].push({X:Math.abs(tableTop.pockets[0][i].X),Y:tableTop.pockets[0][i].Y})
+		}
+		tableTop.pockets.push([])
+		for(i=0;i<tableTop.pockets[0].length;i++){
+			tableTop.pockets[tableTop.pockets.length-1].push({X:Math.abs(tableTop.pockets[0][i].X),Y:Math.abs(tableTop.pockets[0][i].Y)})
+		}
+
+		tableTop.pockets.push([])
+		for(i=0;i<tableTop.pockets[0].length;i++){
+			tableTop.pockets[tableTop.pockets.length-1].push({X:(tableTop.pockets[0][i].X),Y:Math.abs(tableTop.pockets[0][i].Y)})
+		}
+		
+		tableTop.pockets.push([])
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang,Y:-table.depth/2+table.overHang+thickness+(((table.depth-(table.overHang*2)-thickness*2)/5)*2)})
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang+thickness+pocketClearance,Y:-table.depth/2+table.overHang+thickness+(((table.depth-(table.overHang*2)-thickness*2)/5)*2)})
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang+thickness+pocketClearance,Y:Math.abs(tableTop.pockets[tableTop.pockets.length-1][tableTop.pockets[tableTop.pockets.length-1].length-1].Y)})
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang,Y:Math.abs(tableTop.pockets[tableTop.pockets.length-1][tableTop.pockets[tableTop.pockets.length-1].length-1].Y)})
+
+		tableTop.pockets.push([])
+		for(i=0;i<tableTop.pockets[tableTop.pockets.length-2].length;i++){
+			tableTop.pockets[tableTop.pockets.length-1].push({X:Math.abs(tableTop.pockets[tableTop.pockets.length-2][i].X),Y:tableTop.pockets[tableTop.pockets.length-2][i].Y})
+		}
+
+		tableTop.pockets.push([])
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang+((table.width-table.overHang*2)/5*2),Y:-table.depth/2+table.overHang})
+		tableTop.pockets[tableTop.pockets.length-1].push({X:-table.width/2+table.overHang+((table.width-table.overHang*2)/5*2),Y:-table.depth/2+table.overHang+thickness+pocketClearance})
+		tableTop.pockets[tableTop.pockets.length-1].push({X:table.width/2-table.overHang-((table.width-table.overHang*2)/5*2),Y:-table.depth/2+table.overHang+thickness+pocketClearance})
+		tableTop.pockets[tableTop.pockets.length-1].push({X:table.width/2-table.overHang-((table.width-table.overHang*2)/5*2),Y:-table.depth/2+table.overHang})
+
+
+		tableTop.pockets.push([])
+		for(i=0;i<tableTop.pockets[tableTop.pockets.length-2].length;i++){
+			tableTop.pockets[tableTop.pockets.length-1].push({X:(tableTop.pockets[tableTop.pockets.length-2][i].X),Y:Math.abs(tableTop.pockets[tableTop.pockets.length-2][i].Y)})
+		}
+
+		//ccw
+
+		tableSupportFront.cutout.push({X:-table.width/2+table.overHang+clearance,Y:table.supportWidth/2+thickness/2})
+
+		for(i=1;i<5;i++){
+			if(i%2==1){
+				tableSupportFront.cutout.push({X:-table.width/2+table.overHang+(table.width-table.overHang*2)*(i/5)-clearance,Y:table.supportWidth/2+thickness/2})
+				tableSupportFront.cutout.push({X:-table.width/2+table.overHang+(table.width-table.overHang*2)*(i/5)-clearance,Y:table.supportWidth/2})
+			}
+			else{
+				tableSupportFront.cutout.push({X:-table.width/2+table.overHang+(table.width-table.overHang*2)*(i/5)+clearance,Y:table.supportWidth/2})
+				tableSupportFront.cutout.push({X:-table.width/2+table.overHang+(table.width-table.overHang*2)*(i/5)+clearance,Y:table.supportWidth/2+thickness/2})
+			}
+		}
+
+		tableSupportFront.cutout.push({X:table.width/2-table.overHang-clearance,Y:table.supportWidth/2+thickness/2})
+		tableSupportFront.cutout.push({X:table.width/2-table.overHang-clearance,Y:0})
+		tableSupportFront.cutout.push({X:table.width/2-table.overHang-thickness,Y:0})
+		tableSupportFront.cutout.push({X:table.width/2-table.overHang-thickness,Y:table.supportWidth/2,Y:-table.supportWidth/2})
+		tableSupportFront.cutout.push({X:-table.width/2+table.overHang+thickness,Y:table.supportWidth/2,Y:-table.supportWidth/2})
+		tableSupportFront.cutout.push({X:-table.width/2+table.overHang+thickness,Y:table.supportWidth/2,Y:0})
+		tableSupportFront.cutout.push({X:-table.width/2+table.overHang+clearance,Y:table.supportWidth/2,Y:0})
+
+		n=50
+
+		tableSupportFront.holes.push([])
+		for(i=n;i>=0;i--){
+			tableSupportFront.holes[tableSupportFront.holes.length-1].push({X:(table.width/2-table.overHang-thickness*2-1)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:(table.supportWidth/4)+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+
+		tableSupportFront.holes.push([])
+		for(i=n;i>=0;i--){
+			tableSupportFront.holes[tableSupportFront.holes.length-1].push({X:-(table.width/2-table.overHang-thickness*2-1)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:(table.supportWidth/4)+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+
+		tableSupportFront.holes.push([])
+		for(i=n;i>=0;i--){
+			tableSupportFront.holes[tableSupportFront.holes.length-1].push({X:(table.width/2-table.overHang-thickness*2-table.legWidth+1)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:(-table.supportWidth/4)+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+
+		tableSupportFront.holes.push([])
+		for(i=n;i>=0;i--){
+			tableSupportFront.holes[tableSupportFront.holes.length-1].push({X:-(table.width/2-table.overHang-thickness*2-table.legWidth+1)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:(-table.supportWidth/4)+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+
+
+		tableSupportSide.cutout.push({X:-table.supportWidth/2-thickness/2,Y:table.depth/2-table.overHang-clearance-thickness})
+		tableSupportSide.cutout.push({X:0,Y:table.depth/2-thickness-table.overHang-clearance})
+
+		tableSupportSide.cutout.push({X:0,Y:table.depth/2-table.overHang})
+		tableSupportSide.cutout.push({X:table.supportWidth/2,Y:table.depth/2-table.overHang})
+
+		tableSupportSide.cutout.push({X:table.supportWidth/2,Y:-table.depth/2+table.overHang})
+		tableSupportSide.cutout.push({X:0,Y:-table.depth/2+table.overHang})
+
+		tableSupportSide.cutout.push({X:0,Y:-table.depth/2+table.overHang+thickness+clearance})
+		tableSupportSide.cutout.push({X:-table.supportWidth/2-thickness/2,Y:-table.depth/2+thickness+table.overHang+clearance})
+
+		for(i=1;i<5;i++){
+			if(i%2==1){
+				tableSupportSide.cutout.push({X:-table.supportWidth/2-thickness/2,Y:(-table.depth/2+table.overHang+thickness)+(table.depth-(table.overHang*2)-thickness*2)*(i/5)-clearance})
+				tableSupportSide.cutout.push({X:-table.supportWidth/2,Y:(-table.depth/2+table.overHang+thickness)+(table.depth-(table.overHang*2)-thickness*2)*(i/5)-clearance})
+			}
+			else{
+				tableSupportSide.cutout.push({X:-table.supportWidth/2,Y:(-table.depth/2+table.overHang+thickness)+(table.depth-(table.overHang*2)-thickness*2)*(i/5)+clearance})
+				tableSupportSide.cutout.push({X:-table.supportWidth/2-thickness/2,Y:(-table.depth/2+table.overHang+thickness)+(table.depth-(table.overHang*2)-thickness*2)*(i/5)+clearance})
+			}
+		}
+
+
+		tableSupportSide.holes.push([])
+		for(i=n;i>=0;i--){
+			tableSupportSide.holes[tableSupportSide.holes.length-1].push({X:-(table.supportWidth/4)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:-((table.depth/2-table.overHang-thickness*2-1))+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+
+		tableSupportSide.holes.push([])
+		for(i=n;i>=0;i--){
+			tableSupportSide.holes[tableSupportSide.holes.length-1].push({X:(table.supportWidth/4)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:-((table.depth/2-table.overHang-thickness*2-table.legWidth+1))+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+
+		tableSupportSide.holes.push([])
+		for(i=n;i>=0;i--){
+			tableSupportSide.holes[tableSupportSide.holes.length-1].push({X:-(table.supportWidth/4)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:((table.depth/2-table.overHang-thickness*2-1))+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+
+		tableSupportSide.holes.push([])
+		for(i=n;i>=0;i--){
+			tableSupportSide.holes[tableSupportSide.holes.length-1].push({X:(table.supportWidth/4)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:((table.depth/2-table.overHang-thickness*2-table.legWidth+1))+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+
+		//leg1
+		tableLeg1.cutout.push({X:0,Y:table.height/2-1.5})
+		tableLeg1.cutout.push({X:0,Y:table.height/2})
+		tableLeg1.cutout.push({X:table.legWidth/2+thickness,Y:table.height/2})
+		for(i=1;i<7;i++){
+			if(i%2==1){
+				tableLeg1.cutout.push({X:table.legWidth/2+thickness,Y:table.height/2-(table.height*(i/7))+clearance,fillet:fillet})
+				tableLeg1.cutout.push({X:table.legWidth/2,Y:table.height/2-(table.height*(i/7))+clearance,dogbone:true})
+			}
+			else{
+				tableLeg1.cutout.push({X:table.legWidth/2,Y:table.height/2-(table.height*(i/7))-clearance,dogbone:true})
+				tableLeg1.cutout.push({X:table.legWidth/2+thickness,Y:table.height/2-(table.height*(i/7))-clearance,fillet:fillet})
+			}
+		}
+
+		tableLeg1.cutout.push({X:table.legWidth/2+thickness,Y:-table.height/2+thickness+0.125})
+		tableLeg1.cutout.push({X:-table.legWidth/2,Y:-table.height/2+thickness+0.125,fillet:fillet})
+		tableLeg1.cutout.push({X:-table.legWidth/2,Y:-table.height/2+5})
+
+		tableLeg1.holes.push([])
+
+		for(i=n;i>=0;i--){
+			tableLeg1.holes[tableLeg1.holes.length-1].push({X:(-table.legWidth/2+1)+Math.sin(((Math.PI*2)/n*i))*0.155,Y:(-table.height/2+thickness+table.supportWidth*0.75)+Math.cos(((Math.PI*2)/n*i))*0.155})
+		}
+		tableLeg1.holes.push([])
+
+		for(i=n;i>=0;i--){
+			tableLeg1.holes[tableLeg1.holes.length-1].push({X:(table.legWidth/2-1)+Math.sin(((Math.PI*2)/n*i))*0.155,Y:(-table.height/2+thickness+table.supportWidth*0.25)+Math.cos(((Math.PI*2)/n*i))*0.155})
+		}
+
+		//shelf
+		tableLeg1.holes.push([])
+		for(i=n;i>=0;i--){
+			tableLeg1.holes[tableLeg1.holes.length-1].push({X:(table.legWidth/4)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:(table.height/2-thickness*2-1)+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+			tableLeg1.holes.push([])
+			for(j=n;j>=0;j--){
+				tableLeg1.holes[tableLeg1.holes.length-1].push({X:(table.legWidth/4)+Math.sin(((Math.PI*2)/n*j))*0.15,Y:(0)+Math.cos(((Math.PI*2)/n*j))*0.15})
+			}
+
+			tableLeg1.holes.push([])
+			for(j=n;j>=0;j--){
+				tableLeg1.holes[tableLeg1.holes.length-1].push({X:(table.legWidth/4)+Math.sin(((Math.PI*2)/n*j))*0.15,Y:(table.height/7)+Math.cos(((Math.PI*2)/n*j))*0.15})
+			}
+
+
+			tableLeg1.holes.push([])
+			for(j=n;j>=0;j--){
+				tableLeg1.holes[tableLeg1.holes.length-1].push({X:(table.legWidth/4)+Math.sin(((Math.PI*2)/n*j))*0.15,Y:(-table.height/7)+Math.cos(((Math.PI*2)/n*j))*0.15})
+			}
+
+		//foot block cutout 1
+		tableLeg1.holes.push([])
+
+		tableLeg1.holes[tableLeg1.holes.length-1].push({X:table.legWidth/3,Y:table.height/2-thickness})
+		tableLeg1.holes[tableLeg1.holes.length-1].push({X:table.legWidth/6-clearance,Y:table.height/2-thickness})
+		tableLeg1.holes[tableLeg1.holes.length-1].push({X:table.legWidth/6-clearance,Y:table.height/2-thickness*2-clearance2})
+		tableLeg1.holes[tableLeg1.holes.length-1].push({X:table.legWidth/3,Y:table.height/2-thickness*2-clearance2})
+
+		//leg2
+		tableLeg2.cutout.push({X:-table.legWidth/2,Y:table.height/2})
+		tableLeg2.cutout.push({X:0,Y:table.height/2})
+		tableLeg2.cutout.push({X:0,Y:table.height/2-1.5})
+		tableLeg2.cutout.push({X:table.legWidth/2,Y:-table.height/2+5})
+		tableLeg2.cutout.push({X:table.legWidth/2,Y:-table.height/2+thickness+0.125})
+		tableLeg2.cutout.push({X:-table.legWidth/2,Y:-table.height/2+thickness+0.125})
+
+		//
+
+		for(i=1;i<7;i++){
+			if(i%2==1){
+				tableLeg2.cutout.push({X:-table.legWidth/2,Y:-table.height/2+(table.height*(i/7)),dogbone:true})
+				tableLeg2.cutout.push({X:-table.legWidth/2-thickness,Y:-table.height/2+(table.height*(i/7))})
+			}
+			else{
+				tableLeg2.cutout.push({X:-table.legWidth/2-thickness,Y:-table.height/2+(table.height*(i/7))})
+				tableLeg2.cutout.push({X:-table.legWidth/2,Y:-table.height/2+(table.height*(i/7)),dogbone:true})
+			}
+		}
+
+		tableLeg2.holes.push([])
+		for(i=n;i>=0;i--){
+			tableLeg2.holes[tableLeg2.holes.length-1].push({X:(-table.legWidth/2+1)+Math.sin(((Math.PI*2)/n*i))*0.155,Y:(-table.height/2+thickness+table.supportWidth/4)+Math.cos(((Math.PI*2)/n*i))*0.155})
+		}
+		tableLeg2.holes.push([])
+		for(i=n;i>=0;i--){
+			tableLeg2.holes[tableLeg2.holes.length-1].push({X:(table.legWidth/2-1)+Math.sin(((Math.PI*2)/n*i))*0.155,Y:(-table.height/2+thickness+table.supportWidth*0.75)+Math.cos(((Math.PI*2)/n*i))*0.155})
+		}
+
+		//foot block cutout 2
+
+		tableLeg2.holes.push([])
+
+		tableLeg2.holes[tableLeg2.holes.length-1].push({X:-table.legWidth/3,Y:table.height/2-thickness*2-clearance2})
+		tableLeg2.holes[tableLeg2.holes.length-1].push({X:-table.legWidth/6+clearance,Y:table.height/2-thickness*2-clearance2})
+		tableLeg2.holes[tableLeg2.holes.length-1].push({X:-table.legWidth/6+clearance,Y:table.height/2-thickness})
+		tableLeg2.holes[tableLeg2.holes.length-1].push({X:-table.legWidth/3,Y:table.height/2-thickness})
+
+
+		//shelf
+		tableLeg2.holes.push([])
+		for(i=n;i>=0;i--){
+			tableLeg2.holes[tableLeg2.holes.length-1].push({X:-(table.legWidth/4)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:(table.height/2-thickness*2-1)+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+
+		tableLeg2.holes.push([])
+		for(i=n;i>=0;i--){
+			tableLeg2.holes[tableLeg2.holes.length-1].push({X:-(table.legWidth/4)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:(0)+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+
+		tableLeg2.holes.push([])
+		for(i=n;i>=0;i--){
+			tableLeg2.holes[tableLeg2.holes.length-1].push({X:-(table.legWidth/4)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:(table.height/7)+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+		tableLeg2.holes.push([])
+		for(i=n;i>=0;i--){
+			tableLeg2.holes[tableLeg2.holes.length-1].push({X:-(table.legWidth/4)+Math.sin(((Math.PI*2)/n*i))*0.15,Y:(-table.height/7)+Math.cos(((Math.PI*2)/n*i))*0.15})
+		}
+
+		tableFoot1.cutout.push({X:table.legWidth/4,Y:table.legWidth/4})
+
+		tableFoot1.cutout.push({X:-table.legWidth/4,Y:table.legWidth/4})
+
+		n=50
+		for(i=n;i>=0;i--){
+			tableFoot1.cutout.push({X:(0)+Math.sin(((Math.PI/2)/n*i)+Math.PI)*table.legWidth/4,Y:(0)+Math.cos(((Math.PI/2)/n*i)+Math.PI)*table.legWidth/4})
+		}
+
+		tableFoot1.cutout.push({X:table.legWidth/4,Y:-table.legWidth/4})
+
+		//foot2
+
+		for(i=0;i<tableFoot1.cutout.length;i++){
+			tableFoot2.cutout.push(tableFoot1.cutout[i])
+		}
+		
+		tableFoot2.cutout.splice(1,0,{X:-(table.legWidth/12),Y:table.legWidth/4})
+		tableFoot2.cutout.splice(1,0,{X:-(table.legWidth/12),Y:table.legWidth/4+thickness})
+		tableFoot2.cutout.splice(1,0,{X:(table.legWidth/12),Y:table.legWidth/4+thickness})
+		tableFoot2.cutout.splice(1,0,{X:(table.legWidth/12),Y:table.legWidth/4})
+
+
+		tableFoot2.cutout.splice(58,0,{X:table.legWidth/4,Y:table.legWidth/12})
+		tableFoot2.cutout.splice(58,0,{X:table.legWidth/4+thickness,Y:table.legWidth/12})
+		tableFoot2.cutout.splice(58,0,{X:table.legWidth/4+thickness,Y:-table.legWidth/12})
+		tableFoot2.cutout.splice(58,0,{X:table.legWidth/4,Y:-table.legWidth/12})
+
+		n=50
+
+		for(i=0;i<=n;i++){
+			tableFoot2.holes.push({X:(0)+Math.sin(((Math.PI*2)/n*i))*0.2,Y:(0)+Math.cos(((Math.PI*2)/n*i))*0.2})
+
+		}
+
+		for(i=n;i>=0;i--){
+			tableFoot2.pockets.push({X:(0)+Math.sin(((Math.PI*2)/n*i))*0.45,Y:(0)+Math.cos(((Math.PI*2)/n*i))*0.45})
+
+		}
+
+		tableFoot1.holes=[tableFoot2.holes]
+		tableFoot2.holes=[tableFoot2.holes]	
+
+		tableShelf.cutout.push({X:-(table.width/2)+table.overHang+(thickness*2),Y:-(table.depth/2)+table.overHang+(thickness*2)})
+		tableShelf.cutout.push({X:-(table.width/2)+table.overHang+(thickness*2),Y:(table.depth/2)-table.overHang-(thickness*2)})
+		tableShelf.cutout.push({X:(table.width/2)-table.overHang-(thickness*2),Y:(table.depth/2)-table.overHang-(thickness*2)})
+		tableShelf.cutout.push({X:(table.width/2)-table.overHang-(thickness*2),Y:-(table.depth/2)+table.overHang+(thickness*2)})
+
+		//pocket shelf blocks
+		//tableShelf.pockets.push([])
+		//tableShelf.pockets[tableShelf.pockets.length-1].push({X:-1,Y:1})
+		//tableShelf.pockets[tableShelf.pockets.length-1].push({X:1,Y:1})
+		//tableShelf.pockets[tableShelf.pockets.length-1].push({X:1,Y:-1})
+		//tableShelf.pockets[tableShelf.pockets.length-1].push({X:-1,Y:-1})		
+		//console.log(tableShelf)
+
+		tableShelfBlock.cutout.push({X:-table.legWidth/4,Y:-1})
+		tableShelfBlock.cutout.push({X:-table.legWidth/4,Y:1})
+		tableShelfBlock.cutout.push({X:table.legWidth/4,Y:1})
+
+		tableShelfBlock.cutout.push({X:table.legWidth/4,Y:0})
+		tableShelfBlock.cutout.push({X:table.legWidth/4-thickness,Y:0})
+		tableShelfBlock.cutout.push({X:table.legWidth/4-thickness,Y:-1})
+
+
+		tableShelfBlock.holes.push([])
+		for(i=n;i>=0;i--){
+			tableShelfBlock.holes[tableShelfBlock.holes.length-1].push({X:(0)+Math.sin(((Math.PI*2)/n*i))*0.155,Y:(0)+Math.cos(((Math.PI*2)/n*i))*0.155})
+		}
+
+	draw()
+
+	makePart(tableTop,"top")
+	makePart(tableLeg1,"leg1")
+	makePart(tableLeg1,"leg1.2")
+	makePart(tableLeg1,"leg1.3")
+	makePart(tableLeg1,"leg1.4")
+	makePart(tableLeg2,"leg2")
+	makePart(tableLeg2,"leg2.2")
+	makePart(tableLeg2,"leg2.3")
+	makePart(tableLeg2,"leg2.4")
+
+	makePart(tableFoot1,"foot1")
+	makePart(tableFoot1,"foot1.2")
+	makePart(tableFoot1,"foot1.3")
+	makePart(tableFoot1,"foot1.4")
+
+	makePart(tableFoot2,"foot2")
+	makePart(tableFoot2,"foot2.2")
+	makePart(tableFoot2,"foot2.3")
+	makePart(tableFoot2,"foot2.4")
+
+	makePart(tableSupportFront,"support1")
+	makePart(tableSupportFront,"support1-b")
+	makePart(tableSupportSide,"support2")
+	makePart(tableSupportSide,"support2-l")
+
+	makePart(tableShelf,"shelf")
+
+	makePart(tableShelfBlock,"shelfB1")
+	makePart(tableShelfBlock,"shelfB2")
+	makePart(tableShelfBlock,"shelfB3")
+	makePart(tableShelfBlock,"shelfB4")
+	makePart(tableShelfBlock,"shelfB5")
+	makePart(tableShelfBlock,"shelfB6")
+	makePart(tableShelfBlock,"shelfB7")
+	makePart(tableShelfBlock,"shelfB8")
+
+	scale(sf)
+
+}
+
+function makePart(part,type){
+
+	extrudeSettings.amount = thickness*10
+
+	shape = new THREE.Shape()
+
+	shape.moveTo(part.cutout[0].X*10,part.cutout[0].Y*10)
+
+	for(i=1;i<part.cutout.length;i++){
+	shape.lineTo(part.cutout[i].X*10,part.cutout[i].Y*10)
+	}
+	shape.lineTo(part.cutout[0].X*10,part.cutout[0].Y*10)
+
+	if(part.holes.length>0){
+
+	for(i=0;i<part.holes.length;i++){
+		hole = new THREE.Shape()
+		hole.moveTo(part.holes[i][0].X*10,part.holes[i][0].Y*10)
+		for(j=1;j<part.holes[i].length;j++){
+		hole.lineTo(part.holes[i][j].X*10,part.holes[i][j].Y*10)
+		}
+		hole.lineTo(part.holes[i][0].X*10,part.holes[i][0].Y*10)
+		shape.holes.push(hole)
+	}
+
+	}
+
+
+	extrude = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+	geometry = new THREE.EdgesGeometry(extrude,40)
+
+	if(type=="top"){
+
+		topWF = new THREE.LineSegments(geometry,lineMaterial)
+		tTop = new THREE.Mesh( extrude, materials )
+
+		rotateX(topWF,Math.PI/2)
+		rotateX(tTop,Math.PI/2)
+
+		translate(topWF,0,table.height*10,0)
+		translate(tTop,0,table.height*10,0)
+
+		scene.add( topWF )
+		scene.add( tTop )
+
+	extrudeSettings.amount = thickness*10/2
+
+	for(i=0;i<part.pockets.length;i++){
+		
+		p = new THREE.Shape()
+
+		p.moveTo(part.pockets[i][0].X*10,part.pockets[i][0].Y*10)
+		for(j=1;j<part.pockets[i].length;j++){
+		p.lineTo(part.pockets[i][j].X*10,part.pockets[i][j].Y*10)
+		}
+		p.lineTo(part.pockets[i][0].X*10,part.pockets[i][0].Y*10)
+
+		if(i==0){
+			extrude = new THREE.ExtrudeGeometry(p, extrudeSettings)
+			geometry = new THREE.EdgesGeometry(extrude,40)
+			pocketWF = new THREE.LineSegments(geometry,lineMaterial)
+			rotateX(pocketWF,Math.PI/2)
+			translate(pocketWF,0,table.height*10-thickness*5,0)
+	
+			scene.add( pocketWF )
+		}
+		else if(i==1){
+			extrude = new THREE.ExtrudeGeometry(p, extrudeSettings)
+			geometry = new THREE.EdgesGeometry(extrude,40)
+			pocket1WF = new THREE.LineSegments(geometry,lineMaterial)
+			rotateX(pocket1WF,Math.PI/2)
+			translate(pocket1WF,0,table.height*10-thickness*5,0)	
+			scene.add( pocket1WF )
+		}
+		else if(i==2){
+			extrude = new THREE.ExtrudeGeometry(p, extrudeSettings)
+			geometry = new THREE.EdgesGeometry(extrude,40)
+			pocket2WF = new THREE.LineSegments(geometry,lineMaterial)
+			rotateX(pocket2WF,Math.PI/2)
+			translate(pocket2WF,0,table.height*10-thickness*5,0)	
+			scene.add( pocket2WF )
+		}
+		else if(i==3){
+			extrude = new THREE.ExtrudeGeometry(p, extrudeSettings)
+			geometry = new THREE.EdgesGeometry(extrude,40)
+			pocket3WF = new THREE.LineSegments(geometry,lineMaterial)
+			rotateX(pocket3WF,Math.PI/2)
+			translate(pocket3WF,0,table.height*10-thickness*5,0)	
+			scene.add( pocket3WF )
+		}
+		else if(i==4){
+			extrude = new THREE.ExtrudeGeometry(p, extrudeSettings)
+			geometry = new THREE.EdgesGeometry(extrude,40)
+			pocket4WF = new THREE.LineSegments(geometry,lineMaterial)
+			rotateX(pocket4WF,Math.PI/2)
+			translate(pocket4WF,0,table.height*10-thickness*5,0)	
+			scene.add( pocket4WF )
+		}
+		else if(i==5){
+			extrude = new THREE.ExtrudeGeometry(p, extrudeSettings)
+			geometry = new THREE.EdgesGeometry(extrude,40)
+			pocket5WF = new THREE.LineSegments(geometry,lineMaterial)
+			rotateX(pocket5WF,Math.PI/2)
+			translate(pocket5WF,0,table.height*10-thickness*5,0)	
+			scene.add( pocket5WF )
+		}
+		else if(i==6){
+			extrude = new THREE.ExtrudeGeometry(p, extrudeSettings)
+			geometry = new THREE.EdgesGeometry(extrude,40)
+			pocket6WF = new THREE.LineSegments(geometry,lineMaterial)
+			rotateX(pocket6WF,Math.PI/2)
+			translate(pocket6WF,0,table.height*10-thickness*5,0)	
+			scene.add( pocket6WF )
+		}
+		else if(i==7){
+			extrude = new THREE.ExtrudeGeometry(p, extrudeSettings)
+			geometry = new THREE.EdgesGeometry(extrude,40)
+			pocket7WF = new THREE.LineSegments(geometry,lineMaterial)
+			rotateX(pocket7WF,Math.PI/2)
+			translate(pocket7WF,0,table.height*10-thickness*5,0)	
+			scene.add( pocket7WF )
+		}
+		
+	}
+
+	}
+	else if(type=="leg1"){
+		leg1WF = new THREE.LineSegments(geometry,lineMaterial)
+		leg1 = new THREE.Mesh( extrude, materials )
+
+		rotateX(leg1WF,Math.PI)
+		rotateX(leg1,Math.PI)
+
+		translate(leg1WF,table.width*10/2-table.legWidth*10/2-thickness*2*10-table.overHang*10,(table.height/2)*10,table.depth*10/2-thickness*10-table.overHang*10)
+		translate(leg1,table.width*10/2-table.legWidth*10/2-thickness*2*10-table.overHang*10,(table.height/2)*10,table.depth*10/2-thickness*10-table.overHang*10)
+
+		scene.add( leg1WF )
+		scene.add( leg1 )
+
+	}
+	else if(type=="leg1.3"){
+		leg1WF = new THREE.LineSegments(geometry,lineMaterial)
+		leg1 = new THREE.Mesh( extrude, materials )
+
+		rotateX(leg1WF,Math.PI)
+		rotateX(leg1,Math.PI)
+
+		translate(leg1WF,table.width*10/2-table.legWidth*10/2-thickness*2*10-table.overHang*10,(table.height/2)*10,-table.depth*10/2+thickness*2*10+table.overHang*10)
+		translate(leg1,table.width*10/2-table.legWidth*10/2-thickness*2*10-table.overHang*10,(table.height/2)*10,-table.depth*10/2+thickness*2*10+table.overHang*10)
+
+		scene.add( leg1WF )
+		scene.add( leg1 )
+
+	}
+	else if(type=="leg1.2"){
+		leg1WF = new THREE.LineSegments(geometry,lineMaterial)
+		leg1 = new THREE.Mesh( extrude, materials )
+
+		rotateX(leg1WF,Math.PI)
+		rotateX(leg1,Math.PI)
+
+		rotateY(leg1WF,Math.PI)
+		rotateY(leg1,Math.PI)
+
+		translate(leg1WF,-table.width*10/2+table.legWidth*10/2+thickness*2*10+table.overHang*10,(table.height/2)*10,table.depth*10/2-thickness*2*10-table.overHang*10)
+		translate(leg1,-table.width*10/2+table.legWidth*10/2+thickness*2*10+table.overHang*10,(table.height/2)*10,table.depth*10/2-thickness*2*10-table.overHang*10)
+
+		scene.add( leg1WF )
+		scene.add( leg1 )
+
+	}
+	else if(type=="leg1.4"){
+		leg1WF = new THREE.LineSegments(geometry,lineMaterial)
+		leg1 = new THREE.Mesh( extrude, materials )
+
+		rotateX(leg1WF,Math.PI)
+		rotateX(leg1,Math.PI)
+
+		rotateY(leg1WF,Math.PI)
+		rotateY(leg1,Math.PI)
+
+		translate(leg1WF,-table.width*10/2+table.legWidth*10/2+thickness*2*10+table.overHang*10,(table.height/2)*10,-table.depth*10/2+thickness*10+table.overHang*10)
+		translate(leg1,-table.width*10/2+table.legWidth*10/2+thickness*2*10+table.overHang*10,(table.height/2)*10,-table.depth*10/2+thickness*10+table.overHang*10)
+
+		scene.add( leg1WF )
+		scene.add( leg1 )
+
+	}
+	else if(type=="leg2"){
+		leg2WF = new THREE.LineSegments(geometry,lineMaterial)
+		leg2 = new THREE.Mesh( extrude, materials )
+
+		rotateX(leg2WF,Math.PI)
+		rotateX(leg2,Math.PI)
+		rotateY(leg2WF,Math.PI/2)
+		rotateY(leg2,Math.PI/2)
+
+		translate(leg2WF,table.width*10/2-thickness*10-table.overHang*10,(table.height/2)*10,table.depth*10/2-table.legWidth*10/2-thickness*2*10-table.overHang*10)
+		translate(leg2,table.width*10/2-thickness*10-table.overHang*10,(table.height/2)*10,table.depth*10/2-table.legWidth*10/2-thickness*2*10-table.overHang*10)
+
+		scene.add( leg2WF )
+		scene.add( leg2 )
+	}
+	else if(type=="leg2.2"){
+		leg2WF = new THREE.LineSegments(geometry,lineMaterial)
+		leg2 = new THREE.Mesh( extrude, materials )
+
+		rotateX(leg2WF,Math.PI)
+		rotateX(leg2,Math.PI)
+		rotateY(leg2WF,-Math.PI/2)
+		rotateY(leg2,-Math.PI/2)
+
+		translate(leg2WF,table.width*10/2-thickness*2*10-table.overHang*10,(table.height/2)*10,-table.depth*10/2+table.legWidth*10/2+thickness*2*10+table.overHang*10)
+		translate(leg2,table.width*10/2-thickness*2*10-table.overHang*10,(table.height/2)*10,-table.depth*10/2+table.legWidth*10/2+thickness*2*10+table.overHang*10)
+
+		scene.add( leg2WF )
+		scene.add( leg2 )
+	}
+	else if(type=="leg2.3"){
+		leg2WF = new THREE.LineSegments(geometry,lineMaterial)
+		leg2 = new THREE.Mesh( extrude, materials )
+
+		rotateX(leg2WF,Math.PI)
+		rotateX(leg2,Math.PI)
+		rotateY(leg2WF,Math.PI/2)
+		rotateY(leg2,Math.PI/2)
+
+		translate(leg2WF,-table.width*10/2+thickness*2*10+table.overHang*10,(table.height/2)*10,table.depth*10/2-table.legWidth*10/2-thickness*2*10-table.overHang*10)
+		translate(leg2,-table.width*10/2+thickness*2*10+table.overHang*10,(table.height/2)*10,table.depth*10/2-table.legWidth*10/2-thickness*2*10-table.overHang*10)
+
+		scene.add( leg2WF )
+		scene.add( leg2 )
+	}
+	else if(type=="leg2.4"){
+		leg2WF = new THREE.LineSegments(geometry,lineMaterial)
+		leg2 = new THREE.Mesh( extrude, materials )
+
+		rotateX(leg2WF,Math.PI)
+		rotateX(leg2,Math.PI)
+		rotateY(leg2WF,-Math.PI/2)
+		rotateY(leg2,-Math.PI/2)
+
+		translate(leg2WF,-table.width*10/2+thickness*10+table.overHang*10,(table.height/2)*10,-table.depth*10/2+table.legWidth*10/2+thickness*2*10+table.overHang*10)
+		translate(leg2,-table.width*10/2+thickness*10+table.overHang*10,(table.height/2)*10,-table.depth*10/2+table.legWidth*10/2+thickness*2*10+table.overHang*10)
+
+		scene.add( leg2WF )
+		scene.add( leg2 )
+	}
+
+	else if(type=="foot1"){
+		foot1WF = new THREE.LineSegments(geometry,lineMaterial)
+		foot1 = new THREE.Mesh( extrude, materials )
+
+		rotateX(foot1WF,Math.PI/2)
+		rotateX(foot1,Math.PI/2)
+
+		//console.log(table.overHang)
+
+		translate(foot1WF,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,thickness*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+		translate(foot1,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,thickness*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+
+		scene.add( foot1WF )
+		scene.add( foot1 )
+	}
+	else if(type=="foot1.2"){
+		foot1WF = new THREE.LineSegments(geometry,lineMaterial)
+		foot1 = new THREE.Mesh( extrude, materials )
+
+		rotateX(foot1WF,Math.PI/2)
+		rotateX(foot1,Math.PI/2)
+
+		rotateY(foot1WF,Math.PI*1.5)
+		rotateY(foot1,Math.PI*1.5)
+
+		translate(foot1WF,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,thickness*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+		translate(foot1,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,thickness*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+
+		scene.add( foot1WF )
+		scene.add( foot1 )
+	}
+	else if(type=="foot1.3"){
+		foot1WF = new THREE.LineSegments(geometry,lineMaterial)
+		foot1 = new THREE.Mesh( extrude, materials )
+
+		rotateX(foot1WF,Math.PI/2)
+		rotateX(foot1,Math.PI/2)
+
+		rotateY(foot1WF,Math.PI/2)
+		rotateY(foot1,Math.PI/2)
+
+		translate(foot1WF,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,thickness*10,(-(table.depth/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10)
+		translate(foot1,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,thickness*10,(-(table.depth/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10)
+
+		scene.add( foot1WF )
+		scene.add( foot1 )
+	}
+
+	else if(type=="foot1.4"){
+
+		foot1WF = new THREE.LineSegments(geometry,lineMaterial)
+		foot1 = new THREE.Mesh( extrude, materials )
+
+		rotateX(foot1WF,Math.PI/2)
+		rotateX(foot1,Math.PI/2)
+
+		rotateY(foot1WF,Math.PI)
+		rotateY(foot1,Math.PI)
+
+		translate(foot1WF,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,thickness*10,(-(table.depth/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10)
+		translate(foot1,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,thickness*10,(-(table.depth/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10)
+
+		scene.add( foot1WF )
+		scene.add( foot1 )
+	}
+
+	else if(type=="foot2"){
+
+		foot2WF = new THREE.LineSegments(geometry,lineMaterial)
+		foot2 = new THREE.Mesh(extrude,materials)
+
+		rotateX(foot2WF,Math.PI/2)
+		rotateX(foot2,Math.PI/2)
+
+		translate(foot2WF,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,thickness*2*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+		translate(foot2,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,thickness*2*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+
+		scene.add( foot2WF )
+		scene.add( foot2 )
+
+	}
+
+	else if(type=="foot2.2"){
+
+		foot2WF = new THREE.LineSegments(geometry,lineMaterial)
+		foot2 = new THREE.Mesh(extrude,materials)
+
+		rotateX(foot2WF,Math.PI/2)
+		rotateX(foot2,Math.PI/2)
+
+		rotateY(foot2WF,Math.PI*1.5)
+		rotateY(foot2,Math.PI*1.5)
+
+		translate(foot2WF,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,thickness*2*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+		translate(foot2,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,thickness*2*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+
+		scene.add( foot2WF )
+		scene.add( foot2 )
+
+	}
+
+
+	else if(type=="foot2.3"){
+
+		foot2WF = new THREE.LineSegments(geometry,lineMaterial)
+		foot2 = new THREE.Mesh(extrude,materials)
+
+		rotateX(foot2WF,Math.PI/2)
+		rotateX(foot2,Math.PI/2)
+
+		rotateY(foot2WF,Math.PI)
+		rotateY(foot2,Math.PI)
+
+		translate(foot2WF,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,thickness*2*10,(-(table.depth/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10)
+		translate(foot2,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,thickness*2*10,(-(table.depth/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10)
+
+		scene.add( foot2WF )
+		scene.add( foot2 )
+
+	}
+
+	else if(type=="foot2.4"){
+		foot2WF = new THREE.LineSegments(geometry,lineMaterial)
+		foot2 = new THREE.Mesh(extrude,materials)
+
+		rotateX(foot2WF,Math.PI/2)
+		rotateX(foot2,Math.PI/2)
+
+		rotateY(foot2WF,Math.PI/2)
+		rotateY(foot2,Math.PI/2)
+
+		translate(foot2WF,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,thickness*2*10,(-(table.depth/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10)
+		translate(foot2,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,thickness*2*10,(-(table.depth/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10)
+
+		scene.add( foot2WF )
+		scene.add( foot2 )
+
+	}
+
+	else if(type=="support1"){
+		support1WF = new THREE.LineSegments(geometry,lineMaterial)
+		support1 = new THREE.Mesh( extrude, materials )
+
+		translate(support1,0,(table.height-(table.supportWidth/2)-(thickness*1.5))*10,((table.depth/2)-(thickness)-(table.overHang))*10)
+		translate(support1WF,0,(table.height-(table.supportWidth/2)-(thickness*1.5))*10,((table.depth/2)-(thickness)-(table.overHang))*10)
+
+		scene.add( support1WF )
+		scene.add( support1 )
+
+	}
+	else if(type=="support1-b"){
+		support1WF = new THREE.LineSegments(geometry,lineMaterial)
+		support1 = new THREE.Mesh( extrude, materials )
+
+		translate(support1,0,(table.height-(table.supportWidth/2)-(thickness*1.5))*10,(-(table.depth/2)+(table.overHang))*10)
+		translate(support1WF,0,(table.height-(table.supportWidth/2)-(thickness*1.5))*10,(-(table.depth/2)+(table.overHang))*10)
+
+		scene.add( support1WF )
+		scene.add( support1 )
+
+	}
+
+	else if(type=="support2"){
+		support2WF = new THREE.LineSegments(geometry,lineMaterial)
+		support2 = new THREE.Mesh( extrude, materials )
+
+		rotateZ(support2WF,Math.PI*1.5)
+		rotateZ(support2,Math.PI*1.5)
+
+		rotateY(support2WF,Math.PI/2)
+		rotateY(support2,Math.PI/2)
+
+		translate(support2,((table.width/2)-(thickness)-(table.overHang))*10,(table.height-(table.supportWidth/2)-(thickness*1.5))*10,0)
+		translate(support2WF,((table.width/2)-(thickness)-(table.overHang))*10,(table.height-(table.supportWidth/2)-(thickness*1.5))*10,0)
+
+		scene.add( support2WF )
+		scene.add( support2 )
+
+	}
+	else if(type=="support2-l"){
+		support2WF = new THREE.LineSegments(geometry,lineMaterial)
+		support2 = new THREE.Mesh( extrude, materials )
+
+		rotateZ(support2WF,Math.PI*1.5)
+		rotateZ(support2,Math.PI*1.5)
+
+		rotateY(support2WF,Math.PI/2)
+		rotateY(support2,Math.PI/2)
+
+		translate(support2,(-(table.width/2)+(table.overHang))*10,(table.height-(table.supportWidth/2)-(thickness*1.5))*10,0)
+		translate(support2WF,(-(table.width/2)+(table.overHang))*10,(table.height-(table.supportWidth/2)-(thickness*1.5))*10,0)
+
+		scene.add( support2WF )
+		scene.add( support2 )
+
+	}
+	else if((type=="shelf") && (document.getElementById('shelf').checked==true )){
+		shelfWF = new THREE.LineSegments(geometry,lineMaterial)
+		shelf = new THREE.Mesh( extrude, materials )
+
+		rotateX(shelfWF,Math.PI/2)
+		rotateX(shelf,Math.PI/2)
+
+		translate(shelf,0,((table.height/2)+(1+thickness))*10,0)
+		translate(shelfWF,0,((table.height/2)+(1+thickness))*10,0)
+	
+
+		scene.add( shelfWF )
+		scene.add( shelf )
+
+	}
+	else if((type=="shelfB1") && (document.getElementById('shelf').checked==true )){
+		shelfB1WF = new THREE.LineSegments(geometry,lineMaterial)
+		shelfB1 = new THREE.Mesh( extrude, materials )
+
+		rotateX(shelfB1WF,Math.PI)
+		rotateX(shelfB1,Math.PI)
+
+		translate(shelfB1,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,(table.height/2)*10,(-(table.depth/2)+(table.overHang)+(thickness*3))*10)
+		translate(shelfB1WF,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,(table.height/2)*10,(-(table.depth/2)+(table.overHang)+(thickness*3))*10)
+	
+		scene.add( shelfB1WF )
+		scene.add( shelfB1 )
+
+	}
+	else if((type=="shelfB2") && (document.getElementById('shelf').checked==true )){
+		shelfB2WF = new THREE.LineSegments(geometry,lineMaterial)
+		shelfB2 = new THREE.Mesh( extrude, materials )
+
+		rotateY(shelfB2WF,Math.PI)
+		rotateY(shelfB2,Math.PI)
+
+		translate(shelfB2,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,(table.height/2)*10,((table.depth/2)-(table.overHang)-(thickness*2))*10)
+		translate(shelfB2WF,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,(table.height/2)*10,((table.depth/2)-(table.overHang)-(thickness*2))*10)
+
+		scene.add( shelfB2WF )
+		scene.add( shelfB2 )
+
+	}
+	else if((type=="shelfB3") && (document.getElementById('shelf').checked==true )){
+		shelfB3WF = new THREE.LineSegments(geometry,lineMaterial)
+		shelfB3 = new THREE.Mesh( extrude, materials )
+
+		rotateY(shelfB3WF,Math.PI/2)
+		rotateY(shelfB3,Math.PI/2)
+
+		translate(shelfB3,((table.width/2)-(table.overHang)-(thickness*3))*10,(table.height/2)*10,(-(table.depth/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10)
+		translate(shelfB3WF,((table.width/2)-(table.overHang)-(thickness*3))*10,(table.height/2)*10,(-(table.depth/2)+(table.overHang)+(thickness*2+(table.legWidth/4)))*10)
+	
+		scene.add( shelfB3WF )
+		scene.add( shelfB3 )
+
+	}
+	else if((type=="shelfB4") && (document.getElementById('shelf').checked==true )){
+		shelfB4WF = new THREE.LineSegments(geometry,lineMaterial)
+		shelfB4 = new THREE.Mesh( extrude, materials )
+
+		rotateY(shelfB4WF,-Math.PI/2)
+		rotateY(shelfB4,-Math.PI/2)
+
+		rotateZ(shelfB4WF,-Math.PI)
+		rotateZ(shelfB4,-Math.PI)
+
+		translate(shelfB4,(-(table.width/2)+(table.overHang)+(thickness*2))*10,(table.height/2)*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+		translate(shelfB4WF,(-(table.width/2)+(table.overHang)+(thickness*2))*10,(table.height/2)*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+	
+		scene.add( shelfB4WF )
+		scene.add( shelfB4 )
+
+	}
+	else if((type=="shelfB5") && (document.getElementById('shelf').checked==true )){
+		shelfB5WF = new THREE.LineSegments(geometry,lineMaterial)
+		shelfB5 = new THREE.Mesh( extrude, materials )
+
+		rotateY(shelfB5WF,-Math.PI/2)
+		rotateY(shelfB5,-Math.PI/2)
+
+		translate(shelfB5,((table.width/2)-(table.overHang)-(thickness*2))*10,(table.height/2)*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+		translate(shelfB5WF,((table.width/2)-(table.overHang)-(thickness*2))*10,(table.height/2)*10,((table.depth/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10)
+	
+		scene.add( shelfB5WF )
+		scene.add( shelfB5 )
+
+	}
+	else if((type=="shelfB6") && (document.getElementById('shelf').checked==true )){
+		shelfB6WF = new THREE.LineSegments(geometry,lineMaterial)
+		shelfB6 = new THREE.Mesh( extrude, materials )
+
+		rotateY(shelfB6WF,Math.PI/2)
+		rotateY(shelfB6,Math.PI/2)
+
+		translate(shelfB6,(-(table.width/2)+(table.overHang)+(thickness*2))*10,(table.height/2)*10,(-(table.depth/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10)
+		translate(shelfB6WF,(-(table.width/2)+(table.overHang)+(thickness*2))*10,(table.height/2)*10,(-(table.depth/2)+(table.overHang)+(thickness*2+(table.legWidth/4)))*10)
+	
+		scene.add( shelfB6WF )
+		scene.add( shelfB6 )
+
+	}
+	else if((type=="shelfB7") && (document.getElementById('shelf').checked==true )){
+		shelfB7WF = new THREE.LineSegments(geometry,lineMaterial)
+		shelfB7 = new THREE.Mesh( extrude, materials )
+
+		rotateX(shelfB7WF,Math.PI)
+		rotateX(shelfB7,Math.PI)
+
+		translate(shelfB7,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,(table.height/2)*10,((table.depth/2)-(table.overHang)-(thickness*2))*10)
+		translate(shelfB7WF,((table.width/2)-(table.overHang)-(thickness*2)-(table.legWidth/4))*10,(table.height/2)*10,((table.depth/2)-(table.overHang)-(thickness*2))*10)
+	
+		scene.add( shelfB7WF )
+		scene.add( shelfB7 )
+
+	}
+	else if((type=="shelfB8") && (document.getElementById('shelf').checked==true )){
+		shelfB8WF = new THREE.LineSegments(geometry,lineMaterial)
+		shelfB8 = new THREE.Mesh( extrude, materials )
+
+		rotateY(shelfB8WF,Math.PI)
+		rotateY(shelfB8,Math.PI)
+
+		rotateX(shelfB8WF,-Math.PI)
+		rotateX(shelfB8,-Math.PI)
+
+		translate(shelfB8,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,(table.height/2)*10,(-(table.depth/2)+(table.overHang)+(thickness*2))*10)
+		translate(shelfB8WF,(-(table.width/2)+(table.overHang)+(thickness*2)+(table.legWidth/4))*10,(table.height/2)*10,(-(table.depth/2)+(table.overHang)+(thickness*2))*10)
+
+		scene.add( shelfB8WF )
+		scene.add( shelfB8 )
+
+	}
+	else{
+		//console.log(type)
+	}
+
+
+
+
+}
+
+
+function fillet90(x1,y1,x2,y2,x3,y3,r){
+
+
+}
+
+
+$("#thickness").on('change click',function(){
+	thickness = parseFloat($(this).val())
+	updateAll()
+	if((thickness<0.6)||(thickness>0.8)){
+		custom=true
+	}
+})
+
+$("#table-height").on('change click',function(){
+	table.height = parseFloat($(this).val())
+	custom=true
+	updateAll()
+})
+
+$("#table-width").on('change click',function(){
+	table.width = parseFloat($(this).val())
+	custom=true
+	updateAll()
+})
+
+$("#table-depth").on('change click',function(){
+	table.depth = parseFloat($(this).val())
+	custom=true
+	updateAll()
+})
+
+$("#leg-width").on('change click',function(){
+	table.legWidth = parseFloat($(this).val())
+	custom=true
+	updateAll()
+})
+
+$("#radius").on('change click',function(){
+	table.topRadius = parseFloat($(this).val())
+	custom=true
+	updateAll()
+})
+
+$("#overhang").on('change click',function(){
+	table.overHang = parseFloat($(this).val())
+	custom=true
+	updateAll()
+})
+
+
+$("#size").on('change click',function(){
+
+	if($(this).val()=="36"){
+		table=table36
+		custom=false
+		thickness = table.thickness
+	}
+	else if($(this).val()=="60"){
+		table=table60
+		thickness = table.thickness
+		custom=false
+	}
+	else if($(this).val()=="30"){
+		table=table30
+		custom=false
+		thickness = table.thickness
+	}
+	else if($(this).val()=="30x60"){
+		table=table30x60
+		custom=false
+		thickness = table.thickness
+	}
+
+	$("#thickness").val(thickness)
+	$("#table-height").val(table.height)
+	$("#table-width").val(table.width)
+	$("#table-depth").val(table.depth)
+	$("#leg-width").val(table.legWidth)
+	$("#radius").val(table.topRadius)
+	$("#overhang").val(table.overHang)
+
+	updateAll()
+
+})
+
+
+
+		</script>
+	</body>	
+</html>

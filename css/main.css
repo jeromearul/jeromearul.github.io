@@ -3,8 +3,7 @@
 
 /* Pluto */
 
-html,
-body {
+html, body {
 	height: 100%;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-weight: 400;
@@ -16,44 +15,48 @@ body {
 	-webkit-font-smoothing: antialiased;
 	font-smoothing: antialiased;
 	padding: 0;
-	background-color: #333;
-}
+	background-color: #333;}
 .wrapper {
 	padding: 7%;
 	position: relative;
-	z-index: 1;
-}
+	z-index: 1;}
 h1 {
 	font-weight: 600;
 	font-size: 4em;
 	line-height: 1em;
 	margin: 0 0 0.6em;
 	letter-spacing: 0.005em;
-}
+	text-shadow: 0 1px 0 #ccc,
+               0 2px 0 #c9c9c9,
+               0 3px 0 #bbb,
+               0 4px 0 #b9b9b9,
+               0 5px 0 #aaa,
+               0 6px 1px rgba(0,0,0,.1),
+               0 0 5px rgba(0,0,0,.1),
+               0 1px 3px rgba(0,0,0,.3),
+               0 3px 5px rgba(0,0,0,.2),
+               0 5px 10px rgba(0,0,0,.25),
+               0 10px 10px rgba(0,0,0,.2),
+               0 20px 20px rgba(0,0,0,.15);}
 p {
 	margin: 0 0 0 0;
 	line-height: 2.2em;
-	letter-spacing: 0.075em;
-}
+	letter-spacing: 0.075em;}
 p.secondary {
 	font-size: 2em;
 	font-weight: 200;
 	line-height: 1.2em;
 	margin: 0 0 1.2em 0;
-	letter-spacing: 0.075em;
-}
+	letter-spacing: 0.075em;}
 p a:link {
     border-bottom: 1px solid currentColor; /* Or whatever color you want */
     text-decoration: none;
-	color: inherit;
-}
+	color: inherit;}
 p a:visited {
 	color: inherit;
-	transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-}
+	transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;}
 p a:hover {
-	color: #FF8900;
-}
+	color: #FF8900;}
 
 /* waterfall effect background */
 
@@ -63,14 +66,12 @@ p a:hover {
 	top: 0;
 	width: 100%;
 	-webkit-animation: flight 60s linear infinite;
-	animation: flight 60s linear infinite;
-}
+	animation: flight 60s linear infinite;}
 .background img {
 	width: 100%;
 	margin: 0;
 	display: block;
-	border: 0;
-}
+	border: 0;}
 @-webkit-keyframes flight {
 	0% {
 		-webkit-transform: translate(0, 0);

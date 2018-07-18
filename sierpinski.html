@@ -1,4 +1,15 @@
-<html><head><title>Sierpinski Triangle Fractal</title>
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+<link rel="shortcut icon" type="image/ico" href="/geofavicon.ico">
+<title>jerome arul</title>
+<link href="/css/project.css" rel="stylesheet">
+
 <script>
 // HF#1 Like in PARI/GP: return random number 0..max-1
 function randgp(max) {return Math.floor(Math.random()*max)}
@@ -45,11 +56,45 @@ function pSierpinskiT() {
   }}
   pmat01(R, randhclr());
 }
-</script></head>
-<body style="font-family: arial, helvatica, sans-serif;">
-  <b>Please click to start and/or change color: </b>
+</script>
+
+</head>
+
+<body>
+<div class="wrapper">
+		<h1>jerome arul</h1>
+		<p class="secondary">sierpinski tetrahedron</p>
+		<p>Vertex for sierpinski tetrahedron</p> 
+        <p>I noticed that the vertices of the sierpinski tetrahedron, an infinitely regressing fractal, were all the same. Model exhibited at the Wurks, April 2018.</p> 
+        <br>
+        <img src="sierpinski/IMG_4381.JPG" alt="sierpinski" width="900px">
+        <img src="sierpinski/IMG_4384.JPG" alt="sierpinski" width="900px">
+        <br>
+        <iframe id="vs_iframe" src="https://www.viewstl.com/?embedded&url=http://jeromearul.com/sierpinski/joint.stl&noborder=yes" style="border:0;margin:0;width:100%;height:100%;"></iframe>
+        <br>
+        <p>the sierpinski tetrahedron has a dimension given by D=log4/log2 or simply an integer Hausdorff–Besicovitch dimension of 2, and correspondingly has no volume.</p> 
+        <img src="sierpinski/image347.gif" alt="sierpinski" width="380px">
+        <img src="sierpinski/image289.gif" alt="sierpinski" width="339px">
+        <p>image credit: bernt wahl from "fractal explorer", wahl.org</p>
+        <br>
+        <img src="sierpinski/kctetrahedron.jpg" alt="sierpinski" width="900px">
+        <p>excerpt from: keith critchlow's "order in space"</p>
+		<br>
+        <br>
+        <p><a style="border-bottom: none" href="/stuff.html">&#60;</a></p> 
+</div> 
+
+
+<div>
+ <b>Please click to start and/or change color: </b>
   <input type="button" value=" Plot it! " onclick="pSierpinskiT();">&nbsp;&nbsp;
   <h3>Sierpinski triangle fractal</h3>
   <canvas id="cvsId" width="640" height="640" style="border: 2px inset;"></canvas>
   <!--canvas id="cvsId" width="1280" height="1280" style="border: 2px inset;"></canvas-->
-</body></html>
+</div>   
+   
+</body>
+</html>
+
+
+

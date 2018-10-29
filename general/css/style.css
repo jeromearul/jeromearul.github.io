@@ -7,8 +7,7 @@ body            {letter-spacing: 0.1px; padding: 0; margin: 0; font-family: 'Rob
 		font-weight: 400; font-size: 28px; color: #444; min-height: 100%; background: #fff;}
 html            {-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
 pre             {padding: 0; margin: 0;}
-h1              {margin: 5px 0 10px 0; font-weight: 300; font-size: 28px; letter-spacing: .30em;}
-h2              {margin: 5px 0 10px 0; font-weight: 300; font-size: 28px; letter-spacing: .30em; align: right;}
+h1              {margin: 5px 0 10px 0; font-weight: 300; font-size: 28px; letter-spacing: .10em;  line-height: 3;}
 ul              {padding: 0;}
 span            {padding: 0; margin: 0 10px 0 0;}
 li              {margin: 10px 0; padding: 0; list-style: none;}

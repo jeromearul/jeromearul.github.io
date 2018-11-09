@@ -61,10 +61,14 @@ TextScramble = function () {
 // ——————————————————————————————————————————————————
 
 var phrases = [
-'artists',
-'inventors',
-'researchers',
-'scientists'];
+'experimental',
+'fabrication',
+'digital',
+'exploration',
+'electromechanical',
+'synergetics',
+'tactile',
+'prototyping'];
 
 var el = document.querySelector('.text');
 var fx = new TextScramble(el);

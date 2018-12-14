@@ -62,11 +62,11 @@ TextScramble = function () {
 
 var phrases = [
 'creative destruction',
-'logarithms',
-'tetrahedra',
-'char siu rice',
 'entropy',
-'puppies'];
+'tetrahedral accounting',
+'char siu rice',
+'climate change',
+'jazz music'];
 
 var el = document.querySelector('.text');
 var fx = new TextScramble(el);

@@ -66,7 +66,7 @@ var phrases = [
 'tetrahedral accounting',
 'char siu rice',
 'climate change',
-'jazz music'];
+'jazz'];
 
 var el = document.querySelector('.text');
 var fx = new TextScramble(el);

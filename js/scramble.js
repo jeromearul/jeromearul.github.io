@@ -65,8 +65,14 @@ var phrases = [
 'entropy',
 'tetrahedral accounting',
 'char siu rice',
-'climate change',
-'jazz'];
+'spaceship earth',
+'jazz',
+'the uberwelt',
+'carbon 60',
+'syntactics',
+'the greenhouse effect',
+'ephemeralization',
+'taiichi ohno'];
 
 var el = document.querySelector('.text');
 var fx = new TextScramble(el);

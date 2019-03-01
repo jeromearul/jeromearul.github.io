@@ -61,18 +61,18 @@ TextScramble = function () {
 // ——————————————————————————————————————————————————
 
 var phrases = [
-'creative destruction',
-'entropy',
-'tetrahedral accounting',
-'char siu rice',
-'spaceship earth',
-'jazz',
-'the uberwelt',
-'carbon 60',
-'syntactics',
-'the greenhouse effect',
-'ephemeralization',
-'taiichi ohno'];
+'creates destructively',
+'dissolves with entropy',
+'inhabits spaceship earth',
+'accounts tetrahedrally',
+'eats char siu rice',
+'listens to jazz',
+'feigns the uberwelt',
+'tastes like carbon 60',
+'speaks syntactically',
+'lives in a greenhouse',
+'ephemeralizes',
+'is taiichi ohno'];
 
 var el = document.querySelector('.text');
 var fx = new TextScramble(el);
@@ -80,7 +80,7 @@ var fx = new TextScramble(el);
 var counter = 0;
 var next = function next() {
   fx.setText(phrases[counter]).then(function () {
-    setTimeout(next, 800);
+    setTimeout(next, 1000);
   });
   counter = (counter + 1) % phrases.length;
 };

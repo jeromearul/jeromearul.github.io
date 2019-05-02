@@ -63,14 +63,12 @@ TextScramble = function () {
 var phrases = [
 'creates destructively',
 'dissolves with entropy',
-'inhabits spaceship earth',
+'lives on spaceship earth',
 'accounts tetrahedrally',
 'eats char siu rice',
 'listens to jazz',
-'feigns the uberwelt',
 'tastes like carbon 60',
 'speaks syntactically',
-'lives in a greenhouse',
 'ephemeralizes',
 'is taiichi ohno'];
 

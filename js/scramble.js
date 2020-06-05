@@ -61,15 +61,14 @@ TextScramble = function () {
 // ——————————————————————————————————————————————————
 
 var phrases = [
+'makes stuff',
 'creates destructively',
-'dissolves with entropy',
 'lives on spaceship earth',
-'accounts tetrahedrally',
-'eats char siu rice',
+'eats rice',
 'listens to jazz',
 'tastes like carbon 60',
+'dissolves with entropy',
 'speaks syntactically',
-'ephemeralizes',
 'is taiichi ohno'];
 
 var el = document.querySelector('.text');

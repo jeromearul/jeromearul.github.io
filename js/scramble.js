@@ -69,7 +69,7 @@ var phrases = [
 'tastes like carbon 60',
 'dissolves with entropy',
 'speaks syntactically',
-'is taiichi ohno'];
+'collects time crystals'];
 
 var el = document.querySelector('.text');
 var fx = new TextScramble(el);

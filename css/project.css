@@ -31,6 +31,9 @@ h1 {
 	letter-spacing: 0.005em;
 	text-decoration: none;
 }
+img {
+  display: block;
+}
 p {
 	margin: 0 0 0 0;
 	line-height: 2.2em;

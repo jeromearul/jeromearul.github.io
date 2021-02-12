@@ -62,11 +62,11 @@ TextScramble = function () {
 
 var phrases = [
 'makes stuff',
-'creates destructively',
-'lives on spaceship earth',
+'creates and destroys',
+'lives on a spacerock',
 'eats rice',
 'listens to jazz',
-'tastes like carbon 60',
+'tastes like carbon',
 'dissolves with entropy',
 'speaks syntactically',
 'collects time crystals'];

@@ -53,6 +53,42 @@ img             {max-width: 100%; margin-bottom: 10px;}
 .span_2_of_3 { width: 66.13%; }
 .span_1_of_3 { width: 32.26%; }
 
+/* waterfall effect background */
+
+.background {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	-webkit-animation: flight 60s linear infinite;
+	animation: flight 60s linear infinite;}
+.background img {
+	width: 100%;
+	margin: 0;
+	display: block;
+	border: 0;}
+@-webkit-keyframes flight {
+	0% {
+		-webkit-transform: translate(0, 0);
+		transform: translate(0, 0);
+	}
+	100% {
+		-webkit-transform: translate(0, -50%);
+		transform: translate(0, -50%);
+	}
+}
+@keyframes flight {
+	0% {
+		-webkit-transform: translate(0, 0);
+		transform: translate(0, 0);
+	}
+	100% {
+		-webkit-transform: translate(0, -50%);
+		transform: translate(0, -50%);
+	}
+}
+
+
 /*  GO FULL WIDTH BELOW 480 PIXELS */
 @media only screen and (max-width: 700px) {
 	.col {  margin: 1% 0 1% 0%; }

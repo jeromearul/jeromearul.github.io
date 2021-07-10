@@ -19,13 +19,13 @@
 		<br>
 		Initial angle:<input id="in_angle" type="number" min="0" max="180" onchange="condReset()"/>(degrees)
 		<br>
-		<button type="button" onclick="startAnimation()">Start</button>
-		<button type="button" onclick="stopAnimation()">Stop</button>
+		<button type="text" onclick="startAnimation()">Start</button>
+		<button type="text" onclick="stopAnimation()">Stop</button>
 		<button type="button" onclick="reset()">Reset</button>
 		<script>
 			in_angle.value = 0;
 			var cx = 150, cy = 50;
-			var radius = 100; // cm
+			var radius = 200; // cm
 			var g = 981; // cm/s^2
 			var angle = 0; // radians
 			var vel = 0; // cm/s

@@ -56,7 +56,7 @@ img             {max-width: 100%; margin-bottom: 10px;}
 /* waterfall effect background */
 
 .background {
-	position: relative;
+	position: fixed;
 	left: 0;
 	top: 0;
 	width: 100%;

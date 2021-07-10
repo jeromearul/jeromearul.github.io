@@ -3,7 +3,7 @@
 /* jero jero */
 
 body            {letter-spacing: 0.1px; padding: 0; margin: 0; font-family: "Helvetica Neue", Helvetica, Arial, "sans-serif"; 
-		font-weight: 400; font-size: 16px; color: #fff; min-height: 100%; background: #000;}
+		font-weight: 400; font-size: 16px; color: #fff; min-height: 100%;}
 html            {-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
 pre             {padding: 0; margin: 0;}
 h1              {margin: 5px 0 10px 0; font-weight: 300; font-size: 24px; letter-spacing: 0.005em; max-width: 100%;}

@@ -52,6 +52,19 @@ img             {max-width: 100%; margin-bottom: 10px;}
 .span_3_of_3 { width: 100%; }
 .span_2_of_3 { width: 66.13%; }
 .span_1_of_3 { width: 32.26%; }
+/*  GRID OF TWO */
+.span_2_of_2 { width: 100%; }
+.span_1_of_2 { width: 49.2%; }
+
+
+/*  GO FULL WIDTH BELOW 480 PIXELS */
+@media only screen and (max-width: 480px) {
+	.col {  margin: 1% 0 1% 0%; }
+	.span_2_of_2 { width: 100%; }
+	.span_1_of_2 { width: 100%; }
+	.span_3_of_3, .span_2_of_3, .span_1_of_3 { width: 100%; }
+}
+
 
 /* waterfall effect background */
 

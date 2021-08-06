@@ -3,7 +3,7 @@
 /* jero jero */
 
 body            {letter-spacing: 0.1px; padding: 0; margin: 0; font-family: "Helvetica Neue", Helvetica, Arial, "sans-serif"; 
-		font-weight: 400; font-size: small; color: #fff; min-height: 100%; background-color: #000;}
+		font-weight: 400; font-size: small; color: #fff; min-height: 100%; background-color: #999;}
 html            {-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
 pre             {padding: 0; margin: 0;}
 h1              {margin: 5px 0 10px 0; font-weight: 300; font-size: 24px; letter-spacing: 0.005em; max-width: 100%;}
@@ -64,44 +64,6 @@ img             {max-width: 100%; margin-bottom: 10px;}
 	.span_1_of_2 { width: 100%; }
 	.span_3_of_3, .span_2_of_3, .span_1_of_3 { width: 100%; }
 }
-
-/* waterfall effect background */
-
-.background {
-	position: fixed;
-	left: 0;
-	top: 0;
-	width: 100%;
-	z-index: -100;
-	-webkit-animation: flight 120s linear infinite;
-	animation: flight 120s linear infinite;}
-.background img {
-	width: 100%;
-	margin: 0;
-	display: block;
-	border: 0;
-	}
-@-webkit-keyframes flight {
-	0% {
-		-webkit-transform: translate(0, 0);
-		transform: translate(0, 0);
-	}
-	100% {
-		-webkit-transform: translate(0, -50%);
-		transform: translate(0, -50%);
-	}
-}
-@keyframes flight {
-	0% {
-		-webkit-transform: translate(0, 0);
-		transform: translate(0, 0);
-	}
-	100% {
-		-webkit-transform: translate(0, -50%);
-		transform: translate(0, -50%);
-	}
-}
-
 
 /*  GO FULL WIDTH BELOW 480 PIXELS */
 @media only screen and (max-width: 700px) {

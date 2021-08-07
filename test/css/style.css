@@ -48,6 +48,11 @@ img             {max-width: 100%; margin-bottom: 10px;}
 .group:after { content:""; display:table; }
 .group:after { clear:both;}
 .group { zoom:1; /* For IE 6/7 */ }
+/*  GRID OF FOUR  */
+.span_4_of_4 { width: 100%; }
+.span_3_of_4 { width: 74.6%; }
+.span_2_of_4 { width: 49.2%; }
+.span_1_of_4 { width: 23.8%; }
 /*  GRID OF THREE  */
 .span_3_of_3 { width: 100%; }
 .span_2_of_3 { width: 66.13%; }

@@ -3,7 +3,7 @@
 /* jero jero */
 
 body            {letter-spacing: 0.1px; padding: 0; margin: 0; font-family: "Helvetica Neue", Helvetica, Arial, "sans-serif"; 
-		font-weight: 400; font-size: small; color: #fff; min-height: 100%; background-color: black;}
+		font-weight: 400; font-size: small; color: #fff; min-height: 100%; background-color: #000;}
 html            {-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
 pre             {padding: 0; margin: 0;}
 h1              {margin: 5px 0 10px 0; font-weight: 300; font-size: 24px; letter-spacing: 0.005em; max-width: 100%;}
@@ -21,8 +21,8 @@ img             {max-width: 100%; margin-bottom: 10px;}
 #list           {margin-bottom: 20px; margin-top: 20px;}
 #post           {max-width: 720px; margin-bottom: 20px; margin-top: -10px; line-height: 28px;}
 
-.container 		{position: relative; text-align: center; color: black;}
-.header 		{position: absolute;}
+.container 		{position: relative; text-align: center; width: 100%;}
+.header			{position: absolute; top: 35px; left: 60px;}
 .X              {margin:0 5px}
 .title          {display: inline-block; margin-bottom: 20px; margin-top: 20px;}
 .filter         {display:block; margin-bottom: 20px; margin-top: 20px;}

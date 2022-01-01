@@ -17,7 +17,7 @@ img             {max-width: 100%; margin-bottom: 10px;}
 
 #page           {max-width: 100%; min-height: 100%; margin: auto; padding: 35px 60px;}
 #content        {width: 100%;}
-#footer 		{width: 100%; overflow: hidden; letter-spacing: 0px;}
+#header,#footer {width: 100%; overflow: hidden; letter-spacing: 0px;}
 #list           {margin-bottom: 20px; margin-top: 20px;}
 #post           {max-width: 720px; margin-bottom: 20px; margin-top: -10px; line-height: 28px;}
 
@@ -60,45 +60,6 @@ img             {max-width: 100%; margin-bottom: 10px;}
 /*  GRID OF TWO */
 .span_2_of_2 { width: 100%; }
 .span_1_of_2 { width: 49.2%; }
-
-
-
-
-/* waterfall effect background */
-
-.header {
-	letter-spacing: 0px;
-	position: fixed;
-	left: 0;
-	top: 0;
-	width: 100%;
-	-webkit-animation: flight 60s linear infinite;
-	animation: flight 60s linear infinite;}
-.header img {
-	width: 100%;
-	margin: 0;
-	display: block;
-	border: 0;}
-@-webkit-keyframes flight {
-	0% {
-		-webkit-transform: translate(0, 0);
-		transform: translate(0, 0);
-	}
-	100% {
-		-webkit-transform: translate(0, -50%);
-		transform: translate(0, -50%);
-	}
-}
-@keyframes flight {
-	0% {
-		-webkit-transform: translate(0, 0);
-		transform: translate(0, 0);
-	}
-	100% {
-		-webkit-transform: translate(0, -50%);
-		transform: translate(0, -50%);
-	}
-}
 
 
 /*  GO FULL WIDTH BELOW 480 PIXELS */

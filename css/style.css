@@ -15,14 +15,13 @@ a:hover         {color: #999; font-weight:500;}
 p               {padding: 0; margin: 10px 0 10px 0;}
 img             {max-width: 100%; margin-bottom: 10px;}
 
-#page           {max-width: 100%; min-height: 100%; margin: auto; padding: 20px 60px 35px;}
-#content        {width: 100%;}
+#content        {max-width: 100%; min-height: 100%; margin: auto; padding: 120px 60px 35px;}
 #footer 		{width: 100%; overflow: hidden; letter-spacing: 0px;}
 #list           {margin-bottom: 20px; margin-top: 20px;}
 #post           {max-width: 720px; margin-bottom: 20px; margin-top: -10px; line-height: 28px;}
 
 .container 		{position: relative; text-align: left; width: 100%; background: #fff;}
-.header			{position: absolute; top: 35px; height: 50px; left: 60px; color: #222; background: #fff;}
+.header			{position: absolute; padding: 60px; top: 35px; height: 120px; width: 100%; color: #222; background: #fff;}
 .X              {margin:0 5px}
 .title          {display: inline-block; margin-bottom: 20px; margin-top: 20px;}
 .filter         {display:block; margin-bottom: 20px; margin-top: 20px;}

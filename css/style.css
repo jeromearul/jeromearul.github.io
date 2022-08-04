@@ -22,7 +22,7 @@ img             {max-width: 100%; margin-bottom: 10px;}
 #post           {max-width: 720px; margin-bottom: 20px; margin-top: -10px; line-height: 28px;}
 
 .container 		{position: relative; text-align: left; width: 100%; background: #fff;}
-.header			{position: absolute; top: 35px; left: 60px;}
+.header			{position: absolute; top: 35px; height: 50px; left: 60px; color: #222; background: #fff;}
 .X              {margin:0 5px}
 .title          {display: inline-block; margin-bottom: 20px; margin-top: 20px;}
 .filter         {display:block; margin-bottom: 20px; margin-top: 20px;}

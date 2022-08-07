@@ -21,7 +21,7 @@ img             {max-width: 100%; margin-bottom: 10px;}
 #post           {max-width: 720px; margin-bottom: 20px; margin-top: -10px; line-height: 28px;}
 
 .container 		{position: relative; text-align: left; width: 100%; background: #fff;}
-.header			{position: absolute; padding: 60px; top: 35px; height: 120px; width: 100%; color: #222; background: #fff;}
+.header			{position: absolute; padding: 20px 60px; top: 0px; width: 100%; color: #222; background: #fff;}
 .X              {margin:0 5px}
 .title          {display: inline-block; margin-bottom: 20px; margin-top: 20px;}
 .filter         {display:block; margin-bottom: 20px; margin-top: 20px;}

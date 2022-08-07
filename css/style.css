@@ -6,7 +6,7 @@ body            {letter-spacing: 0.1px; padding: 0; margin: 0; font-family: "Hel
 		font-weight: 400; font-size: small; color: #fff; min-height: 100%; background-color: #000;}
 html            {-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;}
 pre             {padding: 0; margin: 0;}
-h1              {margin: 5px 0 10px 0; font-weight: 300; font-size: 24px; letter-spacing: 0.005em; max-width: 100%;}
+h1              {color: #444; margin: 5px 0 10px 0; font-weight: 300; font-size: 24px; letter-spacing: 0.005em; max-width: 100%;}
 ul              {padding: 0;}
 span            {padding: 0; margin: 0 10px 0 0;}
 li              {margin: 10px 0; padding: 0; list-style: none;}
@@ -21,7 +21,7 @@ img             {max-width: 100%; margin-bottom: 10px;}
 #post           {max-width: 720px; margin-bottom: 20px; margin-top: -10px; line-height: 28px;}
 
 .container 		{position: relative; text-align: left; width: 100%; background: #fff;}
-.header			{position: absolute; padding: 20px 60px; top: 0px; width: 100%; color: #222; background: #fff;}
+.header			{position: absolute; padding: 10px 60px; top: 0px; width: 100%; color: #222; background: #fff;}
 .X              {margin:0 5px}
 .title          {display: inline-block; margin-bottom: 20px; margin-top: 20px;}
 .filter         {display:block; margin-bottom: 20px; margin-top: 20px;}

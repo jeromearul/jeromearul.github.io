@@ -10,7 +10,7 @@ h1              {color: #444; margin: 5px 0 10px 0; font-weight: 300; font-size:
 ul              {padding: 0;}
 span            {padding: 0; margin: 0 10px 0 0;}
 li              {margin: 10px 0; padding: 0; list-style: none;}
-a               {color: #ccc; transition-duration: 0.2s;}
+a               {transition-duration: 0.2s;}
 a:hover         {color: #999;}
 p               {padding: 0; margin: 10px 0 10px 0;}
 img             {max-width: 100%; margin-bottom: 10px;}
@@ -21,7 +21,7 @@ img             {max-width: 100%; margin-bottom: 10px;}
 #post           {max-width: 720px; margin-bottom: 20px; margin-top: -10px; line-height: 28px;}
 
 .container 		{position: relative; text-align: left; width: 100%; background: #fff;}
-.header			{position: absolute; padding: 10px 60px 5px; top: 0px; width: 100%; color: #222; background: #fff;}
+.header			{position: absolute; padding: 10px 60px 0px; top: 0px; width: 90%; color: #222; background: #fff;}
 .X              {margin:0 5px}
 .title          {display: inline-block; margin-bottom: 20px; margin-top: 20px;}
 .filter         {display:block; margin-bottom: 20px; margin-top: 20px;}

@@ -10,7 +10,7 @@ h1              {color: #444; margin: 5px 0 10px 0; font-weight: 300; font-size:
 ul              {padding: 0;}
 span            {padding: 0; margin: 0 10px 0 0;}
 li              {margin: 10px 0; padding: 0; list-style: none;}
-a               {transition-duration: 0.2s;}
+a               {color: #ccc; transition-duration: 0.2s;}
 a:hover         {color: #999;}
 p               {padding: 0; margin: 10px 0 10px 0;}
 img             {max-width: 100%; margin-bottom: 10px;}

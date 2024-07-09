@@ -1,42 +1,27 @@
 @charset "UTF-8";
 /* CSS Document */
-
 /* Carbon (updated from Pluto) */
 
 html, body {
 	height: 100%;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-	font-weight: 400;
+	font-weight: 200;
+	font-size: 1em;
 	color: #eee;
 	text-align: left;
-	text-shadow: 0 0 3px rgba(0, 0, 0, .8);
-	font-size: small;
-	line-height: 1em;
 	-webkit-font-smoothing: antialiased;
 	font-smoothing: antialiased;
-	padding: 0;
 	background-color: #000;}
 .wrapper {
-	padding: 10px 0 10px 0;
+	padding: 10px;
 	position: relative;
 	z-index: 1;}
 h1 {
-	font-weight: 600;
-	font-size: 2em;
-	line-height: 1em;
-	margin: 0 0 0.6em;
-	letter-spacing: 0.005em;
-	}
+	font-weight: 400;
+	font-size: 1em;
+	margin: 0 0 0.5em;}
 p {
-	margin: 0 0 0 0;
-	line-height: 1em;
-	letter-spacing: 0.075em;}
-p.secondary {
-	font-size: 2em;
-	font-weight: 200;
-	line-height: 1.2em;
-	margin: 0 0 1.2em 0;
-	letter-spacing: 0.075em;}
+	font-size: 1em;}
 p a:link {
     border-bottom: 1px solid currentColor; /* Or whatever color you want */
     text-decoration: none;

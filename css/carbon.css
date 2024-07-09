@@ -1,7 +1,7 @@
 @charset "UTF-8";
 /* CSS Document */
 
-/* Pluto */
+/* Carbon (updated from Pluto) */
 
 html, body {
 	height: 100%;
@@ -11,25 +11,25 @@ html, body {
 	text-align: left;
 	text-shadow: 0 0 3px rgba(0, 0, 0, .8);
 	font-size: small;
-	line-height: 1.5em;
+	line-height: 1em;
 	-webkit-font-smoothing: antialiased;
 	font-smoothing: antialiased;
 	padding: 0;
 	background-color: #000;}
 .wrapper {
-	padding: 7%;
+	padding: 10px 0 10px 0;
 	position: relative;
 	z-index: 1;}
 h1 {
 	font-weight: 600;
-	font-size: 4em;
+	font-size: 2em;
 	line-height: 1em;
 	margin: 0 0 0.6em;
 	letter-spacing: 0.005em;
 	}
 p {
 	margin: 0 0 0 0;
-	line-height: 2.2em;
+	line-height: 1em;
 	letter-spacing: 0.075em;}
 p.secondary {
 	font-size: 2em;

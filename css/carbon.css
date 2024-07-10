@@ -6,14 +6,14 @@ html, body {
 	height: 100%;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-weight: 300;
-	font-size: 1em;
+	font-size: 0.75em;
 	color: #eee;
 	text-align: left;
 	-webkit-font-smoothing: antialiased;
 	font-smoothing: antialiased;
 	background-color: #000;}
 .wrapper {
-	padding: 10 0 0 10px;
+	padding: 0 0 0 10px;
 	position: relative;
 	z-index: 1;}
 h1 {
@@ -21,9 +21,12 @@ h1 {
 	font-size: 1.25em;
 	margin: 0 0 0.5em;}
 p {
-	font-size: 1em;}
+	font-weight: 300}
 p a:link {
     text-decoration: none;
+	color: inherit;}
+p a:visited { 
+	text-decoration: none; 
 	color: inherit;}
 p a:hover {
 	text-decoration: none;

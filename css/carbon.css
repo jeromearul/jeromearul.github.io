@@ -13,13 +13,13 @@ body {
 	font-smoothing: antialiased;
 	background-color: #000;}
 .wrapper {
-	margin-left: 10px;
+	margin-left: 5%;
 	position: relative;
 	z-index: 1;}
 h1 {
 	font-weight: 600;
 	font-size: 1.25em;
-	margin-bottom: 0em;}
+	margin-bottom: -0.8em;}
 p {
 	color: #eee;
 	font-size: small;}

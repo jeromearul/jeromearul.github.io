@@ -2,7 +2,7 @@
 /* CSS Document */
 /* Carbon (updated from Pluto) */
 
-html, body {
+body {
 	height: 100%;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-weight: 300;
@@ -13,15 +13,16 @@ html, body {
 	font-smoothing: antialiased;
 	background-color: #000;}
 .wrapper {
-	padding: 0 0 0 10px;
+	margin-left: 10px;
 	position: relative;
 	z-index: 1;}
 h1 {
 	font-weight: 600;
 	font-size: 1.25em;
-	margin: 0 0 0.5em;}
+	margin-bottom: 0em;}
 p {
-	font-weight: 300}
+	color: #eee;
+	font-size: small;}
 p a:link {
     text-decoration: none;
 	color: inherit;}

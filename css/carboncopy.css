@@ -67,13 +67,28 @@ p a:hover {
 /* Adjustments for small and large screens */
 
 @media (max-width: 400px) {
+	body {
+	font-size: 12px;}
+.wrapper {
+	padding: 7%;}
+	p {
+	margin-bottom: 2em;
+	line-height: 1.8em;
+	font-size: 1.2em;}
 }
 @media (min-width: 400px and max-width: 640px) {
+	body {
+	font-size: 14px;}
+	p {
+	margin-bottom: 2em;
+	line-height: 1.8em;}
 .background {
 	-webkit-animation-duration: 30s;
 	animation-duration: 30s;}
 }
 @media (min-width: 1280px) {
+	body {
+	font-size: 20px;}
 .background {
 	-webkit-animation-duration: 80s;
 	animation-duration: 80s;}

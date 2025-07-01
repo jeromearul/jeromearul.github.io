@@ -3,11 +3,12 @@
 /* GEOLOEB */
 
 
-body {font-size: 20px;
-      font-family: Arial, Helvetica, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background-color: #ffffff;}
+body {
+	font-size: 20px;
+	font-family: Arial, Helvetica, sans-serif;
+	line-height: 1.6;
+	color: #333;
+	background-color: #ffffff;}
 
 .nav a:link {
     text-decoration: none;

@@ -4,11 +4,11 @@
 
 
 body {
-	font-size: 20px;
+	font-size: 16px;
 	font-family: Arial, Helvetica, sans-serif;
 	line-height: 1.6;
 	color: #333;
-	background-color: #ffffff;}
+	background-color: #fff;}
 
 .nav a:link {
     text-decoration: none;
@@ -16,6 +16,9 @@ body {
 .nav a:visited { 
 	text-decoration: none; 
 	color: inherit;}
+
+.nav {
+	line-height: 60%;}
 
 h1 {
 	font-weight: 600;

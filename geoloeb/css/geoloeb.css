@@ -10,13 +10,21 @@ body {
 	color: #333;
 	background-color: #fff;}
 
+.topnav a:link {
+    text-decoration: none;
+	color: inherit;}
+.topnav a:visited { 
+	text-decoration: none; 
+	color: inherit;}
+.topnav {
+	line-height: 80%;}	
+
 .nav a:link {
     text-decoration: none;
 	color: inherit;}
 .nav a:visited { 
 	text-decoration: none; 
 	color: inherit;}
-
 .nav {
 	line-height: 60%;}
 

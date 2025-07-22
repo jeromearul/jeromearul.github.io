@@ -20,6 +20,10 @@ body {
 .nav {
 	line-height: 60%;}
 
+.mirror-text {
+  transform: scaleX(-1);
+  display: inline-block;}
+
 h1 {
 	font-weight: 600;
 	font-size: 1.25em;

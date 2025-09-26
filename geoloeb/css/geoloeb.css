@@ -32,6 +32,10 @@ body {
   transform: scaleX(-1);
   display: inline-block;}
 
+.bwimg img {
+  -webkit-filter: grayscale(100%); 
+  filter: grayscale(100%);}
+
 h1 {
 	font-weight: 600;
 	font-size: 1.25em;

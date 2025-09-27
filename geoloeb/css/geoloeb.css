@@ -36,6 +36,9 @@ body {
   -webkit-filter: grayscale(100%); 
   filter: grayscale(100%);}
 
+.border img {
+  border: 1px solid black;}
+
 h1 {
 	font-weight: 600;
 	font-size: 1.25em;

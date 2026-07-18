@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Non-Regular Crystal From Pieces</title>
+<style>
+  body { background:#c0c0c0; font-family:"Times New Roman",Times,serif; margin:12px; }
+  h1 { color:#000080; font-size:26px; margin:4px 0; }
+  h2 { color:#000080; font-size:18px; margin:14px 0 4px 0; }
+  fieldset { background:#d4d0c8; border:2px groove #fff; margin-bottom:10px; }
+  legend { font-weight:bold; color:#000080; }
+  canvas { background:#fff; border:2px inset #808080; max-width:100%; }
+  pre#log { background:#000; color:#00ff00; font-family:"Courier New",monospace;
+            font-size:12px; padding:6px; border:2px inset #808080;
+            min-height:80px; max-height:180px; overflow:auto; white-space:pre-wrap; }
+  table.info { border-collapse:collapse; }
+  table.info td, table.info th { border:1px solid #808080; padding:2px 8px; font-size:14px; }
+  input[type=number] { width:60px; }
+  .small { font-size:12px; }
+  a { color:#0000ee; }
+  hr { border:0; border-top:2px groove #fff; }
+</style>
+</head>
+<body>
+
+<h1>&#9670; Non-Regular Crystal From Pieces &#9670;</h1>
+<i>Photograph your flat 2D sheet-material off-cuts &rarr; fold them (virtually) into a closed 3D crystal.</i>
+<hr>
+
+<fieldset>
+<legend>1. Input</legend>
+<input type="file" id="file" accept="image/jpeg,image/png,image/gif,image/bmp,image/webp">
+&nbsp;
+<label><input type="checkbox" id="invert"> Invert (dark pieces on light background)</label>
+<br><span class="small">Standard: <b>light pieces on a dark background</b>, non-overlapping, photographed
+straight-on, <b>outside surface of each piece facing the camera</b>.</span>
+</fieldset>
+
+<fieldset>
+<legend>2. Options</legend>
+<label><input type="checkbox" id="trionly"> Triangles only &mdash; cut every piece into triangles;
+cuts become fold edges (more crystal variety per seed)</label>
+<br>
+Complexity (contour detail): simple
+<input type="range" id="eps" min="1" max="10" value="4" style="vertical-align:middle">
+complex
+<br>
+Seed: <input type="number" id="seed" value="1" min="0" step="1">
+<input type="button" id="reseed" value="New Seed &raquo;">
+&nbsp;
+<input type="button" id="go" value="&#9654; BUILD CRYSTAL" style="font-weight:bold">
+<br><span class="small">Every setting produces a crystal: if the pieces cannot close exactly, the
+edge lengths are adjusted as little as possible and the adjustment is reported below.</span>
+</fieldset>
+
+<pre id="log">Awaiting photo upload...</pre>
+
+<table width="100%"><tr valign="top">
+<td>
+  <h2>Detected Pieces &amp; Cut Plan</h2>
+  <canvas id="plan" width="420" height="420"></canvas>
+  <div class="small">
+    Matching edges share a number. <span style="color:#cc0000">Red dashed</span> = cuts (fold lines).
+    <span style="color:#888">Grey</span> = spare (unused) piece.
+    &nbsp;|&nbsp; <a id="dlplan" href="#" style="display:none">&#9662; Download cutplan.png</a>
+  </div>
+</td>
+<td>
+  <h2>Crystal (drag to rotate)</h2>
+  <canvas id="view" width="420" height="420"></canvas>
+  <div class="small">
+    <label><input type="checkbox" id="spin" checked> auto-rotate</label>
+    &nbsp;|&nbsp; <a id="dl" href="#" style="display:none">&#9662; Download crystal.stl (ASCII)</a>
+  </div>
+</td>
+</tr></table>
+
+<h2>Statistics</h2>
+<table class="info" id="stats"><tr><td>&mdash;</td></tr></table>
+
+<hr>
+<div class="small"><i>Best viewed at 800&times;600. All computation happens in your browser; nothing is uploaded anywhere.</i></div>
+
+<script>
+"use strict";
+/* ============================================================================
+   NON-REGULAR CRYSTAL FROM PIECES - annotated source
+   ----------------------------------------------------------------------------
+   The pipeline, top to bottom:
+
+     STAGE 1  segment()        find the bright blobs in the photo = your pieces
+     STAGE 2  simplify()       turn each blob outline into a clean polygon
+     STAGE 3  earClip()        slice each polygon into triangles
+                               (n-3 cuts for an n-sided piece = the minimum)
+     STAGE 4  tryMatch()       decide which edge glues to which:
+                               every edge of the finished crystal is shared by
+                               exactly TWO pieces, so edges are paired up,
+                               preferring pairs of similar length, and checked
+                               so the result is really a closed solid
+     STAGE 5  vertexClasses()  gluing edges also glues their endpoints:
+                               corners that meet get one shared 3D vertex
+     STAGE 6  solve3D()        find 3D positions for those vertices so every
+                               edge has (as close as possible) its measured
+                               length - done by simple physics-style relaxation
+     STAGE 7  output           STL file + on-screen 3D view + cut plan PNG
+
+   GUARANTEE: this version never stops with an error (except an empty photo).
+   If the pieces cannot close *exactly*, the program repairs the situation:
+     a) an odd number of edges  -> merge the two closest corners somewhere
+     b) polygons that won't glue -> fall back to gluing their triangles instead
+     c) still no valid gluing    -> force a known-good "bipyramid" gluing
+   and any leftover length mismatch is simply averaged out and reported.
+   ==========================================================================*/
+
+// ------------------------------- small helpers ------------------------------
+function log(s){ const el=document.getElementById('log'); el.textContent+="\n"+s; el.scrollTop=el.scrollHeight; }
+function logReset(s){ document.getElementById('log').textContent=s; }
+// Deterministic random numbers from a seed, so the same seed = same crystal.
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0;
+  let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296; }; }
+function dist(a,b){ return Math.hypot(a[0]-b[0],a[1]-b[1]); }
+
+/* ============================================================================
+   STAGE 1 - SEGMENTATION: photo -> one outline per piece
+   ==========================================================================*/
+
+// Otsu's method: automatically choose the brightness level that best splits
+// the image into "piece" pixels and "background" pixels.
+function otsu(hist,total){
+  let sum=0; for(let i=0;i<256;i++) sum+=i*hist[i];
+  let sumB=0,wB=0,best=0,thresh=127;
+  for(let t=0;t<256;t++){
+    wB+=hist[t]; if(!wB) continue;
+    const wF=total-wB; if(!wF) break;
+    sumB+=t*hist[t];
+    const mB=sumB/wB, mF=(sum-sumB)/wF;
+    const between=wB*wF*(mB-mF)*(mB-mF);
+    if(between>best){ best=between; thresh=t; }
+  }
+  return thresh;
+}
+
+function segment(imgData,w,h,invert){
+  // (1a) convert to grey and build a brightness histogram
+  const g=new Uint8Array(w*h), hist=new Uint32Array(256), d=imgData.data;
+  for(let i=0;i<w*h;i++){
+    const v=(d[4*i]*77+d[4*i+1]*151+d[4*i+2]*28)>>8;  // fast luma
+    g[i]=v; hist[v]++;
+  }
+  // (1b) threshold: pixels brighter than the Otsu level are "piece"
+  const t=otsu(hist,w*h);
+  const mask=new Uint8Array(w*h);
+  for(let i=0;i<w*h;i++){
+    let fg = g[i]>t;             // standard: light pieces on dark ground
+    if(invert) fg=!fg;           // checkbox flips it
+    mask[i]=fg?1:0;
+  }
+  // (1c) flood-fill to give every connected blob its own label number
+  const label=new Int32Array(w*h).fill(-1);
+  const comps=[]; const stack=[];
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+    const i=y*w+x;
+    if(!mask[i]||label[i]>=0) continue;
+    const id=comps.length;
+    const c={area:0,touches:false,sx:x,sy:y};   // sx,sy = top-left pixel
+    stack.length=0; stack.push(i); label[i]=id;
+    while(stack.length){
+      const p=stack.pop(), px=p%w, py=(p-px)/w;
+      c.area++;
+      if(px<2||py<2||px>=w-2||py>=h-2) c.touches=true;  // touching photo edge
+      if(py<c.sy||(py===c.sy&&px<c.sx)){ c.sy=py; c.sx=px; }
+      const nb=[p-1,p+1,p-w,p+w];
+      const ok=[px>0,px<w-1,py>0,py<h-1];
+      for(let k=0;k<4;k++)
+        if(ok[k]&&mask[nb[k]]&&label[nb[k]]<0){ label[nb[k]]=id; stack.push(nb[k]); }
+    }
+    comps.push(c);
+  }
+  // (1d) walk around the border of each blob (Moore neighbour tracing) to get
+  //      an ordered list of outline pixels. Tiny blobs and blobs cut off by
+  //      the photo edge are skipped as noise.
+  const dx=[1,1,0,-1,-1,-1,0,1], dy=[0,1,1,1,0,-1,-1,-1];
+  const minArea=Math.max(300,(w*h)*0.001);
+  const contours=[];
+  for(let ci=0;ci<comps.length;ci++){
+    const c=comps[ci];
+    if(c.area<minArea||c.touches) continue;
+    const inC=(x,y)=> x>=0&&y>=0&&x<w&&y<h&&label[y*w+x]===ci;
+    let cx=c.sx, cy=c.sy, dir=7;
+    const pts=[[cx,cy]];
+    for(let step=0, cap=6*c.area+100; step<cap; step++){
+      let found=-1;
+      for(let i=0;i<8;i++){
+        const dd=(dir+6+i)%8;                 // start looking behind-left
+        if(inC(cx+dx[dd],cy+dy[dd])){ found=dd; break; }
+      }
+      if(found<0) break;
+      cx+=dx[found]; cy+=dy[found]; dir=found;
+      if(cx===c.sx&&cy===c.sy) break;         // back at the start = done
+      pts.push([cx,cy]);
+    }
+    if(pts.length>=12) contours.push(pts);
+  }
+  return contours;
+}
+
+/* ============================================================================
+   STAGE 2 - SIMPLIFY: pixel outline -> polygon with few corners
+   (Douglas-Peucker: keep a corner only if the outline bulges away from the
+    straight line by more than a tolerance. The Complexity slider sets it.)
+   ==========================================================================*/
+function dpChain(pts,i0,i1,eps,keep){
+  const ax=pts[i0][0], ay=pts[i0][1], bx=pts[i1][0], by=pts[i1][1];
+  const dx=bx-ax, dy=by-ay, L=Math.hypot(dx,dy)||1e-9;
+  let dmax=-1, imax=-1;
+  for(let i=i0+1;i<i1;i++){
+    const d=Math.abs(dy*pts[i][0]-dx*pts[i][1]+bx*ay-by*ax)/L;
+    if(d>dmax){ dmax=d; imax=i; }
+  }
+  if(dmax>eps){ dpChain(pts,i0,imax,eps,keep); keep[imax]=1; dpChain(pts,imax,i1,eps,keep); }
+}
+function simplify(contour,epsFrac){
+  let per=0;
+  for(let i=0;i<contour.length;i++){
+    const j=(i+1)%contour.length;
+    per+=dist(contour[i],contour[j]);
+  }
+  const eps=epsFrac*per;                       // tolerance ~ % of perimeter
+  // a closed loop is split at two far-apart points into two open chains
+  let a=0,b=0,best=-1;
+  const stride=Math.max(1,Math.floor(contour.length/64));
+  for(let i=0;i<contour.length;i+=stride) for(let j=i+1;j<contour.length;j+=stride){
+    const d=(contour[j][0]-contour[i][0])**2+(contour[j][1]-contour[i][1])**2;
+    if(d>best){ best=d; a=i; b=j; }
+  }
+  const rot=contour.slice(a).concat(contour.slice(0,a));
+  const bb=(b-a+contour.length)%contour.length;
+  const keep=new Uint8Array(rot.length);
+  keep[0]=1; keep[bb]=1;
+  dpChain(rot,0,bb,eps,keep);
+  dpChain(rot.concat([rot[0]]),bb,rot.length,eps,keep);
+  const out=[];
+  for(let i=0;i<rot.length;i++) if(keep[i]) out.push([rot[i][0],rot[i][1]]);
+  return out;
+}
+// Signed area: positive = counter-clockwise. All pieces are normalised to be
+// counter-clockwise "as seen from outside the crystal", which is what makes
+// the gluing rule in Stage 5 work.
+function signedArea(p){
+  let s=0;
+  for(let i=0;i<p.length;i++){ const j=(i+1)%p.length;
+    s+=p[i][0]*p[j][1]-p[j][0]*p[i][1]; }
+  return s/2;
+}
+
+/* ============================================================================
+   STAGE 3 - EAR CLIPPING: polygon -> triangles
+   Repeatedly find a corner ("ear") that can be sliced off without cutting
+   through the polygon, and slice it. An n-gon needs exactly n-3 cuts, which
+   is the mathematical minimum - that IS the cut plan.
+   ==========================================================================*/
+function ptInTri(p,a,b,c){
+  const s=(p1,p2,p3)=>(p1[0]-p3[0])*(p2[1]-p3[1])-(p2[0]-p3[0])*(p1[1]-p3[1]);
+  const d1=s(p,a,b), d2=s(p,b,c), d3=s(p,c,a);
+  return !(((d1<0)||(d2<0)||(d3<0)) && ((d1>0)||(d2>0)||(d3>0)));
+}
+function earClip(poly){
+  const n=poly.length;
+  if(n<3) return [];
+  if(n===3) return [[0,1,2]];
+  const idx=[]; for(let i=0;i<n;i++) idx.push(i);
+  const tris=[];
+  let guard=5*n*n;
+  while(idx.length>3 && guard-->0){
+    let clipped=false;
+    for(let k=0;k<idx.length;k++){
+      const m=idx.length;
+      const i=idx[(k-1+m)%m], j=idx[k], l=idx[(k+1)%m];
+      const a=poly[i],b=poly[j],c=poly[l];
+      const cross=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
+      if(cross<=0) continue;                       // corner bends the wrong way
+      let ear=true;
+      for(const q of idx){
+        if(q===i||q===j||q===l) continue;
+        if(ptInTri(poly[q],a,b,c)){ ear=false; break; }
+      }
+      if(ear){ tris.push([i,j,l]); idx.splice(k,1); clipped=true; break; }
+    }
+    if(!clipped){                                  // safety net: simple fan
+      for(let k=1;k<idx.length-1;k++) tris.push([idx[0],idx[k],idx[k+1]]);
+      return tris;
+    }
+  }
+  if(idx.length===3) tris.push([idx[0],idx[1],idx[2]]);
+  return tris;
+}
+
+/* ============================================================================
+   STAGE 4 - EDGE MATCHING: which edge glues to which?
+   Every edge of a closed solid belongs to exactly two faces. So we list every
+   boundary edge of every piece and pair them up two-by-two, preferring pairs
+   of similar length. A pairing is only accepted if it makes valid geometry:
+     - Euler's rule V - E + F = 2 (true of every ball-shaped solid)
+     - no face gets two of its own corners glued together
+     - every corner of the solid is shared by at least 3 faces
+   The search is a backtracking search (try, and if stuck, undo and try
+   differently). There is NO length cut-off any more: if the best available
+   pairs differ in length, they are still paired and the mismatch is later
+   averaged away - so this stage cannot fail, only run out of its time budget.
+   ==========================================================================*/
+function listEdges(faces){
+  const edges=[];
+  faces.forEach((poly,p)=>{
+    for(let i=0;i<poly.length;i++){
+      const j=(i+1)%poly.length;
+      edges.push({p,i,j,L:dist(poly[i],poly[j])});
+    }
+  });
+  return edges;
+}
+function tryMatch(faces,budget){
+  const edges=listEdges(faces);
+  if(edges.length%2) return null;               // odd count: caller must repair
+  const order=edges.map((_,k)=>k).sort((a,b)=>edges[a].L-edges[b].L);
+  const used=new Array(edges.length).fill(false);
+  const pairs=[];
+  let steps=0;
+  const mism=(a,b)=>Math.abs(a.L-b.L)/Math.max(a.L,b.L);
+  function validTopology(){
+    const {vid,nVerts}=vertexClasses(faces,pairs);
+    if(nVerts - pairs.length + faces.length !== 2) return false;  // Euler
+    const deg=new Array(nVerts).fill(0);
+    for(let p=0;p<faces.length;p++){
+      const seen=new Set(vid[p]);
+      if(seen.size!==faces[p].length) return false;               // face collapsed
+      for(const v of seen) deg[v]++;
+    }
+    return deg.every(d=>d>=3);                                    // corner degree
+  }
+  function bt(){
+    if(++steps>budget) throw "BUDGET";
+    let first=-1;
+    for(const k of order) if(!used[k]){ first=k; break; }
+    if(first<0) return validTopology();       // all paired: check the geometry
+    const ea=edges[first];
+    // candidates: any unused edge on ANOTHER piece, best-length-match first
+    const cands=order.filter(k=>!used[k]&&k!==first&&edges[k].p!==ea.p)
+                     .sort((x,y)=>mism(ea,edges[x])-mism(ea,edges[y]));
+    used[first]=true;
+    for(const k of cands){
+      used[k]=true; pairs.push([ea,edges[k]]);
+      if(bt()) return true;
+      pairs.pop(); used[k]=false;             // undo and try the next candidate
+    }
+    used[first]=false;
+    return false;
+  }
+  try{ if(bt()) return pairs; }catch(e){ if(e!=="BUDGET") throw e; }
+  return null;
+}
+
+// --- repair helper (a): odd edge total -------------------------------------
+// Merging the two endpoints of the globally shortest edge (on any piece with
+// more than 3 corners) removes one edge and fixes the parity. Short edges are
+// usually just photo noise anyway.
+function collapseShortestEdge(faces){
+  let best=null;
+  faces.forEach((poly,p)=>{
+    if(poly.length<=3) return;
+    for(let i=0;i<poly.length;i++){
+      const j=(i+1)%poly.length;
+      const L=dist(poly[i],poly[j]);
+      if(!best||L<best.L) best={p,i,j,L};
+    }
+  });
+  if(!best) return false;
+  const poly=faces[best.p];
+  const mid=[(poly[best.i][0]+poly[best.j][0])/2,(poly[best.i][1]+poly[best.j][1])/2];
+  poly[best.i]=mid;
+  poly.splice(best.j,1);
+  return true;
+}
+
+// --- repair helper (b): treat every triangle as its own piece ----------------
+// If whole polygons will not glue, their triangles (from Stage 3) get glued
+// instead: the cut lines become real fold edges. Returns the triangle faces
+// plus bookkeeping for the drawing (which original piece, which edges are cuts).
+function explode(polys){
+  const faces=[], origOf=[], cutSegs=[];
+  polys.forEach((poly,p)=>{
+    const tris=earClip(poly);
+    const n=poly.length;
+    const isBoundary=(u,v)=> (v===(u+1)%n)||(u===(v+1)%n);
+    for(const t of tris){
+      faces.push([poly[t[0]],poly[t[1]],poly[t[2]]].map(q=>[q[0],q[1]]));
+      origOf.push(p);
+      for(const [u,v] of [[t[0],t[1]],[t[1],t[2]],[t[2],t[0]]])
+        if(!isBoundary(u,v)) cutSegs.push([poly[u],poly[v]]);   // internal = cut
+    }
+  });
+  return {faces,origOf,cutSegs};
+}
+
+// --- repair helper (c): a gluing that ALWAYS exists --------------------------
+// Any even number (>=4) of triangles can be arranged as a "bipyramid": a ring
+// of triangles around the top meeting at one apex, mirrored underneath. This
+// builds that gluing pattern directly, no searching. Edge lengths will not
+// match well, but Stage 6 averages the differences away.
+function canonicalMatch(faces){
+  const F=faces.length;                        // even, >=4, all triangles
+  let combi;                                   // faces as triples of vertex ids
+  if(F===4){
+    combi=[[0,1,2],[0,2,3],[0,3,1],[1,3,2]];   // a tetrahedron
+  }else{
+    const k=F/2;                               // ring size
+    combi=[];
+    for(let i=0;i<k;i++) combi.push([0, 2+i, 2+((i+1)%k)]);          // top
+    for(let i=0;i<k;i++) combi.push([1, 2+((i+1)%k), 2+i]);          // bottom
+  }
+  // find every vertex-pair shared by two faces, record the local edge indices
+  const where={};
+  combi.forEach((tri,p)=>{
+    for(let i=0;i<3;i++){
+      const j=(i+1)%3;
+      const key=Math.min(tri[i],tri[j])+"-"+Math.max(tri[i],tri[j]);
+      (where[key]=where[key]||[]).push({p,i,j});
+    }
+  });
+  const pairs=[];
+  for(const key in where){
+    const [a,b]=where[key];
+    const fa=faces[a.p], fb=faces[b.p];
+    pairs.push([{p:a.p,i:a.i,j:a.j,L:dist(fa[a.i],fa[a.j])},
+                {p:b.p,i:b.i,j:b.j,L:dist(fb[b.i],fb[b.j])}]);
+  }
+  return pairs;
+}
+
+/* ============================================================================
+   STAGE 5 - VERTEX CLASSES: gluing edges glues corners too
+   Uses "union-find": start with every corner separate, then for every glued
+   edge pair, merge the corners that land on each other. Because all pieces
+   are counter-clockwise seen from outside, a glued edge is walked in OPPOSITE
+   directions by its two faces, so corner a merges with d and b with c:
+        piece P:  a ----> b        piece Q:  d <---- c
+   Each merged group becomes ONE vertex of the crystal.
+   ==========================================================================*/
+function vertexClasses(faces,pairs){
+  const parent={};
+  const key=(p,i)=>p+":"+i;
+  faces.forEach((poly,p)=>{ for(let i=0;i<poly.length;i++) parent[key(p,i)]=key(p,i); });
+  const find=x=>{ while(parent[x]!==x){ parent[x]=parent[parent[x]]; x=parent[x]; } return x; };
+  const union=(x,y)=>{ const rx=find(x),ry=find(y); if(rx!==ry) parent[rx]=ry; };
+  for(const [ea,eb] of pairs){
+    union(key(ea.p,ea.i),key(eb.p,eb.j));  // a <-> d
+    union(key(ea.p,ea.j),key(eb.p,eb.i));  // b <-> c
+  }
+  const gid={}, vid=[];
+  let n=0;
+  faces.forEach((poly,p)=>{
+    vid[p]=[];
+    for(let i=0;i<poly.length;i++){
+      const r=find(key(p,i));
+      if(!(r in gid)) gid[r]=n++;
+      vid[p][i]=gid[r];
+    }
+  });
+  return {vid,nVerts:n};
+}
+
+/* ============================================================================
+   STAGE 6 - 3D SOLVE
+   Collect one target length per crystal edge (if the two glued pieces
+   disagree, the average is used - this is the "length adjustment").
+   Two modes:
+     planar faces : EVERY pair of corners within a piece keeps its 2D
+                    distance -> the face stays rigid AND flat.
+     triangle/fold: only the triangle edges keep their length -> the cuts
+                    can fold, and different random seeds fold differently.
+   The solver is "position based dynamics": scatter the vertices randomly
+   (using the seed), then thousands of times nudge each pair of vertices
+   toward its target distance. Several random restarts, keep the best.
+   ==========================================================================*/
+function collectConstraints(faces,vid,planar){
+  const map=new Map();
+  const add=(a,b,L)=>{
+    if(a===b) return;
+    const k=Math.min(a,b)+","+Math.max(a,b);
+    if(map.has(k)) map.set(k,(map.get(k)+L)/2); else map.set(k,L);  // averaging
+  };
+  faces.forEach((poly,p)=>{
+    if(planar){
+      for(let i=0;i<poly.length;i++) for(let j=i+1;j<poly.length;j++)
+        add(vid[p][i],vid[p][j],dist(poly[i],poly[j]));
+    }else{
+      for(const [a,b,c] of earClip(poly)){
+        add(vid[p][a],vid[p][b],dist(poly[a],poly[b]));
+        add(vid[p][b],vid[p][c],dist(poly[b],poly[c]));
+        add(vid[p][c],vid[p][a],dist(poly[c],poly[a]));
+      }
+    }
+  });
+  const out=[];
+  for(const [k,L] of map){ const [a,b]=k.split(","); out.push([+a,+b,L]); }
+  // Repair pass: if averaging made some triangle impossible (one side longer
+  // than the other two together), shorten that side slightly. A few sweeps
+  // keep every triangle buildable, so the solver can close the crystal.
+  if(!planar){
+    const byKey=new Map(out.map((c,i)=>[Math.min(c[0],c[1])+","+Math.max(c[0],c[1]),i]));
+    for(let sweep=0;sweep<4;sweep++){
+      faces.forEach((poly,p)=>{
+        for(const [a,b,c] of earClip(poly)){
+          const ids=[[vid[p][a],vid[p][b]],[vid[p][b],vid[p][c]],[vid[p][c],vid[p][a]]]
+            .map(([u,v])=>byKey.get(Math.min(u,v)+","+Math.max(u,v)))
+            .filter(i=>i!==undefined);
+          if(ids.length<3) continue;
+          const Ls=ids.map(i=>out[i][2]);
+          const im=Ls.indexOf(Math.max(...Ls));
+          const rest=Ls.reduce((s,l,i)=>i===im?s:s+l,0);
+          if(Ls[im]>0.98*rest) out[ids[im]][2]=0.95*rest;
+        }
+      });
+    }
+  }
+  return out;
+}
+function solve3D(nVerts,cons,seed){
+  const rnd=mulberry32(seed);
+  let meanL=0; for(const c of cons) meanL+=c[2]; meanL/=cons.length;
+  let bestX=null,bestErr=1e18;
+  for(let s=0;s<6;s++){                       // 6 random restarts
+    const X=new Float64Array(nVerts*3);
+    for(let i=0;i<X.length;i++) X[i]=(rnd()*2-1)*meanL;   // random scatter
+    for(let it=0;it<450;it++){
+      const w=Math.min(1,0.3+it/150);          // gentle start, firm finish
+      for(const [a,b,L] of cons){
+        let dx=X[3*a]-X[3*b], dy=X[3*a+1]-X[3*b+1], dz=X[3*a+2]-X[3*b+2];
+        let d=Math.hypot(dx,dy,dz);
+        if(d<1e-9){ dx=(rnd()-0.5)*1e-3; dy=(rnd()-0.5)*1e-3; dz=(rnd()-0.5)*1e-3; d=Math.hypot(dx,dy,dz); }
+        const corr=0.5*w*(d-L)/d;              // move both ends half-way each
+        X[3*a]-=corr*dx; X[3*a+1]-=corr*dy; X[3*a+2]-=corr*dz;
+        X[3*b]+=corr*dx; X[3*b+1]+=corr*dy; X[3*b+2]+=corr*dz;
+      }
+    }
+    let maxErr=0;
+    for(const [a,b,L] of cons){
+      const d=Math.hypot(X[3*a]-X[3*b],X[3*a+1]-X[3*b+1],X[3*a+2]-X[3*b+2]);
+      maxErr=Math.max(maxErr,Math.abs(d-L));
+    }
+    if(maxErr<bestErr){ bestErr=maxErr; bestX=X; }
+    if(bestErr<meanL*0.002) break;             // good enough, stop early
+  }
+  return {X:bestX,maxErr:bestErr,meanL};
+}
+
+/* ============================================================================
+   STAGE 7 - OUTPUT: triangles, STL text, cut plan drawing, 3D viewer
+   ==========================================================================*/
+// Turn each face into triangles referring to the shared 3D vertices, and flip
+// any triangle whose front side points into the crystal instead of out.
+function buildTris(faces,vid,X,n){
+  const tris=[];
+  faces.forEach((poly,p)=>{
+    for(const [a,b,c] of earClip(poly)) tris.push([vid[p][a],vid[p][b],vid[p][c]]);
+  });
+  const c=[0,0,0];
+  for(let i=0;i<n;i++){ c[0]+=X[3*i]; c[1]+=X[3*i+1]; c[2]+=X[3*i+2]; }
+  c[0]/=n; c[1]/=n; c[2]/=n;
+  return tris.map(([i,j,k])=>{
+    const v=(m,ax)=>X[3*m+ax];
+    const ux=v(j,0)-v(i,0),uy=v(j,1)-v(i,1),uz=v(j,2)-v(i,2);
+    const wx=v(k,0)-v(i,0),wy=v(k,1)-v(i,1),wz=v(k,2)-v(i,2);
+    const nx=uy*wz-uz*wy, ny=uz*wx-ux*wz, nz=ux*wy-uy*wx;   // face normal
+    const fx=(v(i,0)+v(j,0)+v(k,0))/3-c[0];
+    const fy=(v(i,1)+v(j,1)+v(k,1))/3-c[1];
+    const fz=(v(i,2)+v(j,2)+v(k,2))/3-c[2];
+    return (nx*fx+ny*fy+nz*fz<0)?[i,k,j]:[i,j,k];           // make it face out
+  });
+}
+// ASCII STL: a plain-text list of triangles that any 3D printer/CAD accepts.
+// The crystal is scaled so its largest dimension is 100 units (mm in most software).
+function stlString(X,tris,n){
+  let mn=[1e9,1e9,1e9], mx=[-1e9,-1e9,-1e9];
+  for(let i=0;i<n;i++) for(let a=0;a<3;a++){
+    mn[a]=Math.min(mn[a],X[3*i+a]); mx[a]=Math.max(mx[a],X[3*i+a]);
+  }
+  const span=Math.max(mx[0]-mn[0],mx[1]-mn[1],mx[2]-mn[2])||1;
+  const sc=100/span;
+  const V=i=>[(X[3*i]-mn[0])*sc,(X[3*i+1]-mn[1])*sc,(X[3*i+2]-mn[2])*sc];
+  let s="solid crystal\n";
+  for(const [i,j,k] of tris){
+    const a=V(i),b=V(j),c=V(k);
+    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2];
+    const wx=c[0]-a[0],wy=c[1]-a[1],wz=c[2]-a[2];
+    let nx=uy*wz-uz*wy, ny=uz*wx-ux*wz, nz=ux*wy-uy*wx;
+    const L=Math.hypot(nx,ny,nz)||1; nx/=L; ny/=L; nz/=L;
+    s+="  facet normal "+nx.toExponential(6)+" "+ny.toExponential(6)+" "+nz.toExponential(6)+"\n    outer loop\n";
+    for(const v of [a,b,c]) s+="      vertex "+v[0].toExponential(6)+" "+v[1].toExponential(6)+" "+v[2].toExponential(6)+"\n";
+    s+="    endloop\n  endfacet\n";
+  }
+  return s+"endsolid crystal\n";
+}
+
+// --- cut plan ---------------------------------------------------------------
+// Draws: every piece (yellow) with its number, spare pieces (grey), cut lines
+// (dashed red) and a green number on every glued edge pair. Coordinates are
+// in "math" space (y up), so y is flipped for the screen.
+function drawPlan(polys,spares,cutSegs,labels){
+  const cv=document.getElementById('plan'), ctx=cv.getContext('2d');
+  ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,cv.width,cv.height);   // white bg for PNG
+  let mn=[1e9,1e9],mx=[-1e9,-1e9];
+  const all=polys.concat(spares);
+  all.forEach(poly=>poly.forEach(p=>{
+    mn[0]=Math.min(mn[0],p[0]); mn[1]=Math.min(mn[1],-p[1]);
+    mx[0]=Math.max(mx[0],p[0]); mx[1]=Math.max(mx[1],-p[1]);
+  }));
+  const sc=Math.min(cv.width/(mx[0]-mn[0]+1),cv.height/(mx[1]-mn[1]+1))*0.92;
+  const ox=(cv.width -(mx[0]-mn[0])*sc)/2 - mn[0]*sc;
+  const oy=(cv.height-(mx[1]-mn[1])*sc)/2 - mn[1]*sc;
+  const T=p=>[ox+p[0]*sc, oy+(-p[1])*sc];
+  const drawPoly=(poly,fill,edge)=>{
+    ctx.beginPath();
+    poly.forEach((pt,i)=>{ const [x,y]=T(pt); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+    ctx.closePath();
+    ctx.fillStyle=fill; ctx.fill();
+    ctx.strokeStyle=edge; ctx.lineWidth=1.5; ctx.stroke();
+  };
+  spares.forEach(poly=>drawPoly(poly,"#e0e0e0","#909090"));
+  polys.forEach((poly,p)=>{
+    drawPoly(poly,"#ffffcc","#000080");
+    let cx=0,cy=0; poly.forEach(pt=>{cx+=pt[0];cy+=pt[1];});
+    const [px,py]=T([cx/poly.length,cy/poly.length]);
+    ctx.fillStyle="#000080"; ctx.font="bold 13px Times New Roman";
+    ctx.fillText("P"+(p+1),px-8,py+4);
+  });
+  ctx.strokeStyle="#cc0000"; ctx.setLineDash([4,3]); ctx.lineWidth=1;
+  for(const [a,b] of cutSegs){
+    const [x1,y1]=T(a),[x2,y2]=T(b);
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  ctx.font="11px Courier New"; ctx.fillStyle="#006600";
+  for(const lab of labels){                       // {x,y,tx,ty,txt} math coords
+    const m=[lab.x+(lab.tx-lab.x)*0.25, lab.y+(lab.ty-lab.y)*0.25];
+    const [x,y]=T(m);
+    ctx.fillText(lab.txt,x-3,y+3);
+  }
+}
+
+// --- 3D viewer --------------------------------------------------------------
+// A tiny software renderer: rotate the vertices, sort the triangles back to
+// front, draw them shaded by how much each faces the light. Drag to rotate.
+const viewer={tris:null,X:null,n:0,rx:-0.5,ry:0.6,drag:false,lx:0,ly:0};
+function drawView(){
+  const cv=document.getElementById('view'), ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  if(!viewer.tris){ ctx.fillStyle="#808080"; ctx.font="14px Times New Roman";
+    ctx.fillText("(no crystal yet)",150,210); return; }
+  const {X,n,tris}=viewer;
+  const cx=[0,0,0];
+  for(let i=0;i<n;i++){cx[0]+=X[3*i];cx[1]+=X[3*i+1];cx[2]+=X[3*i+2];}
+  cx[0]/=n;cx[1]/=n;cx[2]/=n;
+  const ca=Math.cos(viewer.ry),sa=Math.sin(viewer.ry);
+  const cb=Math.cos(viewer.rx),sb=Math.sin(viewer.rx);
+  const P=new Array(n);
+  let ext=1e-9;
+  for(let i=0;i<n;i++){
+    let x=X[3*i]-cx[0],y=X[3*i+1]-cx[1],z=X[3*i+2]-cx[2];
+    let x1=ca*x+sa*z, z1=-sa*x+ca*z;          // spin around vertical axis
+    let y1=cb*y-sb*z1, z2=sb*y+cb*z1;         // tilt
+    P[i]=[x1,y1,z2];
+    ext=Math.max(ext,Math.hypot(x1,y1));
+  }
+  const sc=180/ext, ox=cv.width/2, oy=cv.height/2;
+  const order=tris.map((t,i)=>i).sort((a,b)=>{
+    const za=(P[tris[a][0]][2]+P[tris[a][1]][2]+P[tris[a][2]][2]);
+    const zb=(P[tris[b][0]][2]+P[tris[b][1]][2]+P[tris[b][2]][2]);
+    return za-zb;                              // far triangles first
+  });
+  for(const ti of order){
+    const [i,j,k]=tris[ti];
+    const a=P[i],b=P[j],c=P[k];
+    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2];
+    const wx=c[0]-a[0],wy=c[1]-a[1],wz=c[2]-a[2];
+    let nx=uy*wz-uz*wy, ny=uz*wx-ux*wz, nz=ux*wy-uy*wx;
+    const L=Math.hypot(nx,ny,nz)||1;
+    const lum=0.35+0.65*Math.max(0,(nx*0.4+ny*0.5+nz*0.77)/L);   // simple light
+    ctx.beginPath();
+    ctx.moveTo(ox+a[0]*sc,oy-a[1]*sc);
+    ctx.lineTo(ox+b[0]*sc,oy-b[1]*sc);
+    ctx.lineTo(ox+c[0]*sc,oy-c[1]*sc);
+    ctx.closePath();
+    ctx.fillStyle="rgb("+Math.floor(60*lum)+","+Math.floor(120*lum)+","+Math.floor(230*lum)+")";
+    ctx.fill();
+    ctx.strokeStyle="#000040"; ctx.lineWidth=1; ctx.stroke();
+  }
+}
+(function animate(){
+  if(document.getElementById('spin').checked && viewer.tris && !viewer.drag){
+    viewer.ry+=0.008; drawView();
+  }
+  requestAnimationFrame(animate);
+})();
+(function(){
+  const cv=document.getElementById('view');
+  const down=(x,y)=>{viewer.drag=true;viewer.lx=x;viewer.ly=y;};
+  const move=(x,y)=>{ if(!viewer.drag)return;
+    viewer.ry+=(x-viewer.lx)*0.01; viewer.rx+=(y-viewer.ly)*0.01;
+    viewer.lx=x;viewer.ly=y; drawView(); };
+  cv.addEventListener('mousedown',e=>down(e.offsetX,e.offsetY));
+  window.addEventListener('mousemove',e=>move(e.offsetX,e.offsetY));
+  window.addEventListener('mouseup',()=>viewer.drag=false);
+  cv.addEventListener('touchstart',e=>{down(e.touches[0].clientX,e.touches[0].clientY);e.preventDefault();});
+  cv.addEventListener('touchmove',e=>{move(e.touches[0].clientX,e.touches[0].clientY);e.preventDefault();});
+  cv.addEventListener('touchend',()=>viewer.drag=false);
+})();
+
+/* ============================================================================
+   MAIN PIPELINE - ties every stage together and NEVER fails:
+   attempt A: glue the whole polygons (planar faces), repairing odd parity
+   attempt B: glue their triangles instead (cuts become folds)
+   attempt C: force the canonical bipyramid gluing (always succeeds)
+   ==========================================================================*/
+let loadedImg=null;
+
+function process(){
+  if(!loadedImg){ logReset("Upload a photo first."); return; }
+  logReset("=== BUILDING CRYSTAL ===");
+  try{
+    // work on a small copy of the photo (max 700px) to stay fast
+    const maxDim=700;
+    const s=Math.min(1,maxDim/Math.max(loadedImg.width,loadedImg.height));
+    const w=Math.round(loadedImg.width*s), h=Math.round(loadedImg.height*s);
+    const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+    const cx=cv.getContext('2d');
+    cx.drawImage(loadedImg,0,0,w,h);
+    const imgData=cx.getImageData(0,0,w,h);
+
+    const invert=document.getElementById('invert').checked;
+    const triOnly=document.getElementById('trionly').checked;
+    // slider 1..10 -> corner tolerance (small = many corners = complex)
+    const epsFrac=0.002+0.004*(11-(+document.getElementById('eps').value));
+    const seed=((+document.getElementById('seed').value)|0)*2654435761>>>0 || 1;
+
+    // ---- stages 1+2: photo -> clean polygons (math coords, CCW) ----
+    const contours=segment(imgData,w,h,invert);
+    log("Pieces found: "+contours.length);
+    if(contours.length===0)
+      throw "No pieces detected. Try the Invert checkbox, or use more contrast between pieces and background.";
+    const polys=[];
+    for(const c of contours){
+      const sp=simplify(c,epsFrac);
+      if(sp.length<3) continue;
+      const m=sp.map(pt=>[pt[0],-pt[1]]);   // flip y: screen -> math coords
+      if(signedArea(m)<0) m.reverse();      // normalise to counter-clockwise
+      polys.push(m);
+    }
+    log("Corner counts: "+polys.map(p=>p.length).join(", "));
+
+    // ---- stage 4 with automatic repairs (attempts A, B, C) ----
+    let faces=null, matches=null, planar=false, cutSegs=[], spares=[], note="";
+
+    // ATTEMPT A - whole polygons as planar faces (only if enough pieces and
+    // the Triangles-only box is off)
+    if(!triOnly && polys.length>=4){
+      const fA=polys.map(p=>p.map(q=>[q[0],q[1]]));       // deep copy
+      let parityOK=true;
+      while(listEdges(fA).length%2){                      // repair (a)
+        if(!collapseShortestEdge(fA)){ parityOK=false; break; }
+        note="(merged two close corners to even the edge count) ";
+      }
+      if(parityOK){
+        const m=tryMatch(fA,150000);
+        if(m){ faces=fA; matches=m; planar=true; log("Gluing found: planar polygon faces. "+note); }
+      }
+      if(!faces) log("Whole polygons would not glue - switching to triangle faces...");
+    }
+
+    // ATTEMPT B - each triangle of each piece is its own face (folds at cuts)
+    if(!faces){
+      const ex=explode(polys);
+      cutSegs=ex.cutSegs;
+      let fB=ex.faces;
+      if(fB.length%2){                                    // parity by dropping
+        let smallest=0,sm=1e18;                           // the smallest triangle
+        fB.forEach((t,i)=>{ const a=Math.abs(signedArea(t)); if(a<sm){sm=a;smallest=i;} });
+        spares.push(fB[smallest]);
+        fB=fB.filter((_,i)=>i!==smallest);
+        log("Odd number of triangles: smallest one set aside as spare.");
+      }
+      if(fB.length>=4){
+        const m=tryMatch(fB,250000);
+        if(m){ faces=fB; matches=m; planar=false; log("Gluing found: triangulated faces (cuts fold)."); }
+        // ATTEMPT C - guaranteed
+        if(!faces){
+          faces=fB; matches=canonicalMatch(fB); planar=false;
+          log("No natural gluing found in time - using the guaranteed bipyramid gluing.");
+        }
+      }else{
+        throw "Fewer than 4 triangles in total - raise the Complexity slider so pieces get more corners.";
+      }
+    }
+
+    // ---- stage 5: shared vertices ----
+    const {vid,nVerts}=vertexClasses(faces,matches);
+    log("Crystal: V="+nVerts+" E="+matches.length+" F="+faces.length+
+        "  (Euler V-E+F="+(nVerts-matches.length+faces.length)+", 2 = closed solid)");
+
+    // how much did edge lengths have to be adjusted?
+    let worstAdj=0;
+    for(const [ea,eb] of matches)
+      worstAdj=Math.max(worstAdj,Math.abs(ea.L-eb.L)/Math.max(ea.L,eb.L));
+    log("Largest edge-length adjustment between glued pairs: "+(100*worstAdj).toFixed(1)+"%");
+
+    // ---- stage 6: solve for 3D positions ----
+    const cons=collectConstraints(faces,vid,planar);
+    const t0=performance.now();
+    const sol=solve3D(nVerts,cons,seed);
+    const errPct=(100*sol.maxErr/sol.meanL).toFixed(2);
+    log("Solved in "+((performance.now()-t0)).toFixed(0)+" ms; worst remaining edge error "+errPct+"%.");
+
+    // ---- stage 7: outputs ----
+    const tris=buildTris(faces,vid,sol.X,nVerts);
+    viewer.X=sol.X; viewer.n=nVerts; viewer.tris=tris;
+    drawView();
+
+    // STL download
+    const stl=stlString(sol.X,tris,nVerts);
+    const dl=document.getElementById('dl');
+    if(dl.href.startsWith('blob:')) URL.revokeObjectURL(dl.href);
+    dl.href=URL.createObjectURL(new Blob([stl],{type:"model/stl"}));
+    dl.download="crystal.stl";
+    dl.style.display="inline";
+
+    // cut plan + its PNG download
+    const labels=[];
+    matches.forEach(([ea,eb],k)=>{
+      for(const e of [ea,eb]){
+        const poly=faces[e.p];
+        let cx2=0,cy2=0; poly.forEach(pt=>{cx2+=pt[0];cy2+=pt[1];});
+        labels.push({x:(poly[e.i][0]+poly[e.j][0])/2, y:(poly[e.i][1]+poly[e.j][1])/2,
+                     tx:cx2/poly.length, ty:cy2/poly.length, txt:String(k+1)});
+      }
+    });
+    drawPlan(planar?faces:polys, spares, planar?[]:cutSegs, labels);
+    const dp=document.getElementById('dlplan');
+    dp.href=document.getElementById('plan').toDataURL('image/png');
+    dp.download="cutplan.png";
+    dp.style.display="inline";
+
+    // stats table
+    document.getElementById('stats').innerHTML=
+      "<tr><th>Pieces</th><th>Faces</th><th>Vertices</th><th>Edges</th><th>Cuts</th>"+
+      "<th>Mode</th><th>Edge adjustment</th><th>Solver error</th></tr>"+
+      "<tr><td>"+polys.length+"</td><td>"+faces.length+"</td><td>"+nVerts+"</td><td>"+matches.length+
+      "</td><td>"+cutSegs.length+"</td><td>"+(planar?"planar polygon faces":"triangle faces (cuts fold)")+
+      "</td><td>"+(100*worstAdj).toFixed(1)+"%</td><td>"+errPct+"%</td></tr>";
+    log("Done. Drag the crystal, download the STL and cut plan, or try a New Seed.");
+  }catch(err){
+    log("NOTE: "+err);
+  }
+}
+
+// -------- user interface wiring --------
+document.getElementById('file').addEventListener('change',function(){
+  const f=this.files[0]; if(!f) return;
+  const img=new Image();
+  img.onload=()=>{ loadedImg=img; logReset("Loaded "+f.name+" ("+img.width+"x"+img.height+")."); process(); };
+  img.onerror=()=>logReset("Could not read that image.");
+  img.src=URL.createObjectURL(f);
+});
+document.getElementById('go').addEventListener('click',process);
+document.getElementById('reseed').addEventListener('click',function(){
+  const s=document.getElementById('seed'); s.value=(+s.value|0)+1; process();
+});
+for(const id of ['invert','trionly']) document.getElementById(id).addEventListener('change',process);
+document.getElementById('eps').addEventListener('change',process);
+drawView();
+</script>
+</body>
+</html>

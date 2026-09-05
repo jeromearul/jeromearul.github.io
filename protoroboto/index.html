@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="underground design and fabrication studio">
+	<title>proto roboto</title>
+	<style>
+		* { box-sizing: border-box; }
+		html, body {
+			margin: 0;
+			padding: 0;
+			background: #fff;
+			color: #333;
+			font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+			font-weight: 400;
+			font-size: 16px;
+			line-height: 1.5em;
+			-webkit-font-smoothing: antialiased;
+		}
+		.hero {
+			min-height: 100vh;
+			min-height: 100svh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 7%;
+			text-align: center;
+		}
+		.scramble {
+			font-size: 2em;
+			font-weight: 200;
+			line-height: 1.2em;
+			letter-spacing: 0.075em;
+			margin: 0;
+			color: #333;
+		}
+		.dud { color: #FF01FD; }
+		.gallery {
+			padding: 0 7% 7%;
+			display: grid;
+			gap: 5%;
+		}
+		.gallery img {
+			width: 100%;
+			display: block;
+		}
+
+		@media (max-width: 400px) {
+			body { font-size: 12px; }
+		}
+		@media (min-width: 400px) and (max-width: 640px) {
+			body { font-size: 14px; }
+		}
+		@media (min-width: 1280px) {
+			body { font-size: 20px; }
+		}
+	</style>
+</head>
+<body>
+
+	<section class="hero">
+		<p class="scramble"><span class="text"></span></p>
+	</section>
+
+	<main class="gallery">
+		<!-- images go here -->
+	</main>
+
+	<script src="js/scramble.js"></script>
+</body>
+</html>

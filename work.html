@@ -35,9 +35,9 @@
 <li><small>019</small> <a href="#had">balance, electricity and structure</a></li>
 <li><small>018</small> <a href="#kozlov">periodical knot</a></li>
 <li><small>017</small> <a href="#proto">proto roboto</a></li>
-<li><small>015</small> <a href="#ecozoom">charcoal cookstoves</a></li>
-<li><small>013</small> <a href="#mobius">mobius motors</a></li>
-<li><small>012</small> <a href="#balloon">balloon mapping</a></li>
+<li><small>015</small> <a href="/about#ecozoom">charcoal cookstoves</a></li>
+<li><small>013</small> <a href="/about#mobius">mobius motors</a></li>
+<li><small>012</small> <a href="/about#balloon">balloon mapping</a></li>
 <li><small>011</small> <a href="#ele">electrathon</a></li>
 <li><small>010</small> <a href="#fsae">formula sae</a></li>
 <li><small>009</small> <a href="#things">moving things</a></li>
@@ -218,13 +218,13 @@
 <a name="risdtv" style="color:black">.</a> 		
 <div class="section group">
 	<div class="col span_1_of_3">
-	<iframe src="https://www.youtube.com/embed/3WPuQuYbDCM" title="YouTube video player" frameborder="0" width="100%" allowfullscreen></iframe>	
+	<a class="yt" href="https://youtu.be/3WPuQuYbDCM" data-id="3WPuQuYbDCM" target="_blank"><img src="https://i.ytimg.com/vi/3WPuQuYbDCM/hq1.jpg" alt="tetrahedron"></a>
 	</div>
 	<div class="col span_1_of_3">
-    <iframe src="https://www.youtube.com/embed/XiSGR6YfnXQ" title="YouTube video player" frameborder="0" width="100%" allowfullscreen></iframe>
+	<a class="yt" href="https://youtu.be/XiSGR6YfnXQ" data-id="XiSGR6YfnXQ" target="_blank"><img src="https://i.ytimg.com/vi/XiSGR6YfnXQ/hq2.jpg" alt="octahedron"></a>
 	</div>
 	<div class="col span_1_of_3">
-	<iframe src="https://www.youtube.com/embed/wLsYptvb0F8" title="YouTube video player" frameborder="0" width="100%" allowfullscreen></iframe>
+	<a class="yt" href="https://youtu.be/wLsYptvb0F8" data-id="wLsYptvb0F8" target="_blank"><img src="https://i.ytimg.com/vi/wLsYptvb0F8/hq3.jpg" alt="icosahedron"></a>
 	</div>
 </div>
 <div class="section group">
@@ -585,8 +585,26 @@ and prototyping studio<br></p>
 	
 </div>
 </div>
-	
+
 </div>
-	
+
+<!-- youtube: thumbnail until clicked, then swap in a minimal player -->
+<script>
+document.querySelectorAll('a.yt').forEach(function (el) {
+	el.addEventListener('click', function (e) {
+		e.preventDefault();
+		var f = document.createElement('iframe');
+		f.src = 'https://www.youtube-nocookie.com/embed/' + el.dataset.id + '?autoplay=1&rel=0&playsinline=1';
+		f.title = el.querySelector('img').alt;
+		f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+		f.referrerPolicy = 'strict-origin-when-cross-origin';
+		var box = document.createElement('div');
+		box.className = 'yt';
+		box.appendChild(f);
+		el.replaceWith(box);
+	});
+});
+</script>
+
 </body>
 </html>

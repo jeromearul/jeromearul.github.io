@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+    <title>jerome arul</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="plays the triangle.">
+    <link rel="shortcut icon" type="image/ico" href="geofavicon.ico"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css" media="screen">
+<style>
+/* same header as work / about, colours inverted */
+.container      {background: #000; z-index: 1;}
+.header         {background: #000; color: #ddd; box-sizing: border-box; width: 100%;}
+#cdt-bg         {position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; z-index: 0; cursor: pointer;}
+#cdt-bg canvas  {display: block;}
+</style>
+</head>
+
+<body>
+<!-- header -->
+<div class="container">
+<div class="header">
+<h1><a href="https://jeromearul.com/work" style="text-decoration:none; color:white">
+<b>jerome arul</b></a></h1>
+<p>plays the triangle</p>
+<br>
+</div>
+</div>
+
+<div id="cdt-bg"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+<script src="/js/cdt-life-v3.js"></script>
+</body>
+</html>
